@@ -1,0 +1,125 @@
+import os
+import json
+import requests
+from flask import make_response
+from jama.json_factories import item_factory
+from slack.slack_json_factories.resp_json import created_item
+from slack import tools
+from pprint import pprint
+
+"""create.py == Backbone of create functionality
+
+There are two main functionalities present in this file:
+    1. Recieving formatted data from a dialog in Slack and posting to Jama
+    2. Recieving filtered/formatted data from text interface and posting to Jama
+
+As the file name is states, these functions are the backbone for the ability to create
+an item from data that is input in Slack.
+
+Attributes:
+    None
+"""
+
+def from_dialog(url_base, json_to_parse):
+    """Creates a Jama item from dialog submission.
+    
+    Args:
+        url_base (string): base url for jama instance
+        json_to_parse (string): slack json submission
+
+    Returns:
+        (dict): Returns JSON object with created item url and status
+    Raises:
+        Exception:
+            Raised if there is a problem parsing dialog data
+    """
+    try:
+        sub_data = json_to_parse["submission"]
+        jama_url = url_base + '/rest/latest/items?setGlobalIdManually=false'
+
+        to_post_obj = item_factory.generate_item()
+
+        parentId, projectId = tools.cutArgument(sub_data["projectId"], '.')
+
+        to_post_obj["project"] = int(projectId)
+        to_post_obj["location"]["parent"]["item"] = int(parentId)
+        to_post_obj["itemType"] = int(sub_data["itemType"])
+        to_post_obj["fields"]["name"] = sub_data["newItemName"]
+        to_post_obj["fields"]["description"] = sub_data["description"]
+        to_post_obj["fields"]["assignedTo"] = sub_data["asignee"]
+
+        jama_resp = requests.post(jama_url, json=to_post_obj, auth=(os.environ['JAMA_USER'], os.environ['JAMA_PASS']))
+            
+        return created_item.resp_json(json.loads(jama_resp.text), to_post_obj["project"])
+    except Exception as err:
+        print(err)
+        err_msg = {
+            "text": "We're sorry, we had trouble handling your data.",
+            "attachments": [
+                {
+                    "text": "Please give it another go!\n\n \
+                    If it doens't work, please submit a bug report"
+                }
+            ]
+        }
+        return make_response(err_msg, 500)
+
+
+
+def from_text(base_url, content_dict):
+    """Create a item to be passed to Jama API
+    
+    Args:
+        base_url (string): Jama instance URL, used to send data to Jama
+        content_dict (dict): key value pairs with parameters to create item.
+        
+    Returns:
+        (dict): Returns JSON object with created item url and status
+    Raises:
+        Exception:
+            Raised if there is a problem parsing dialog data  
+    """
+    # If dict is empty, means there is a parse error
+    if not bool(content_dict):
+        return {
+            "text": "Oh no, there was an error with your inputs!",
+            "attachments": [
+                {
+                    "text": "example: /jamaconnect create: project=49 | name=project name | ...\n\
+                    - or to open a dialog -  \n\
+                    /jamaconnect create: dialog | project=<id>"
+                }
+            ]
+        }
+
+    # Gets JSON structure for a jama item
+    to_post_obj = item_factory.generate_item()
+
+    try:
+        for key in content_dict:
+            # Some keys need to be ints
+            # specifically project, item, itemType
+            if key in to_post_obj:
+                if key != 'project' or key != 'item':
+                    to_post_obj[key] = int(content_dict[key]) if key == 'itemType' else content_dict[key]
+            else:
+                to_post_obj["fields"][key] = content_dict[key]
+
+        # Check to see if an item is specified
+        # If so, use it
+        # If not, use project as parent
+        if "item" in content_dict:
+            to_post_obj["location"]["parent"]["item"] = int(content_dict["item"])
+        elif "project" in content_dict:
+            to_post_obj["location"]["parent"]["project"] = int(content_dict["project"])
+            to_post_obj["location"]["parent"].pop("item")
+    except Exception:
+        return make_response("Error in user inputs", 500)
+        
+
+    url = base_url + '/rest/latest/items/'
+    jama_resp = requests.post(
+        url, json=to_post_obj, auth=(os.environ['JAMA_USER'], os.environ['JAMA_PASS']))
+
+    # Returns json object w/ url of new item
+    return created_item.resp_json(json.loads(jama_resp.text), to_post_obj["project"])

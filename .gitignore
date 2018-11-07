@@ -1,0 +1,30 @@
+*.swp
+
+# Generic flask ignores
+.DS_Store
+.env
+.flaskenv
+*.pyc
+*.pyo
+env/
+.vscode
+env*
+dist/
+build/
+*.egg
+*.egg-info/
+_mailinglist
+.tox/
+.cache/
+.pytest_cache/
+.idea/
+docs/_build/
+**/venv/
+**__pycache__
+*.sh
+
+# Coverage reports
+htmlcov/
+.coverage
+.coverage.*
+*,cover

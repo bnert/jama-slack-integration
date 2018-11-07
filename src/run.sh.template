@@ -1,0 +1,72 @@
+#!/usr/bin/env sh
+
+############################################################
+#                                                          #
+# READ THIS -- IMPORTANT!                                  #
+#                                                          #
+# This is an example of a script that starts the server    #
+# configured for development. You should:                  #
+# 1. Copy this script to "run.sh" (changes will be ignored #
+#    by git that way, which is desirable)                  #
+# 2. Fill the blanks in with your information              #
+# 3. Make "run.sh" executable (run "chmod u+x run.sh")     #
+# 4. Delete this box - you don't need it anymore, and it's #
+#    sort of ugly                                          #
+#                                                          #
+# To then start the server, you would run "./run.sh" in    #
+# the /src directory. You will likely have to set up port  #
+# forwarding and/or a reverse proxy; that is beyond the    #
+# scope of these instructions.                             #
+#                                                          #
+# This is not production ready code; do not attempt to     #
+# deploy this application in a production environment.     #
+#                                                          #
+# NOTE: commented variables are optional, but restrict the #
+# functionality of the application if left blank!          #
+#                                                          #
+############################################################
+
+# The port that the server will listen on
+declare -rx SERVER_ADDRESS="" # Can use localhost for dev (or 127.0.0.1)
+declare -rx SERVER_PORT=""
+
+# The path that the server will listen on
+# e.g. if your server's address is "www.example.com/foo/bar", this value would
+# be "/foo/bar"
+declare -rx URL_RULE=""
+
+# The URL of the Jama instance (e.g. https://xyz.jamacloud.com)
+declare -rx JAMA_URL=""
+
+# The username and password of the Jama user to act as. Hopefully we'll move to
+# OAuth soon, and this won't be necessary.
+declare -rx JAMA_USER=""
+declare -rx JAMA_PASS=""
+
+# The server's Slack signing secret, found in the Slack app configuration.
+# Seriously, this is important. You should provide it, or the server could be
+# coerced to access the Jama instance and make changes AS anyone with stored
+# credentials BY anyone who can send requests to the server. If you have a
+# really, really good reason not to use verification, you can disable it by
+# commenting out the following line.
+declare -rx SLACK_SIGNING_SECRET=""
+
+# The server's OAuth access token for Slack, found in the Slack app
+# configuration. Necessary for the app to function.
+declare -rx SLACK_OAUTH_TOKEN=""
+
+# The server's SlackBot token. Necessary for the Slack Bot to work.
+declare -rx SLACK_BOT_TOKEN=""
+
+# The information necessary to connect to the database. If you do not uncomment
+# these and fill them in, the application will not be able to use the database,
+# which could stop it from performing certain tasks (currently, Jama-side
+# OAuth.)
+# DB_HOST is the address that the database server is running on (likely
+# localhost.) The rest are self-explanatory.
+#declare -rx DB_HOST=""
+#declare -rx DB_USER=""
+#declare -rx DB_PASS=""
+#declare -rx DB_NAME=""
+
+flask run --port=${SERVER_PORT}

@@ -22,7 +22,7 @@ def search_by_string(base_url, string_to_find):
     @returns:
         return_data -> object to be sent to Slack with description of results and array of results as an attachment, or error message string on failure
     """
-    MAX = 10;
+    MAX = 10
 
     # Make sure search string is valid
     if string_to_find == "":

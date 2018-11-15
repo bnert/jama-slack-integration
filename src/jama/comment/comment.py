@@ -1,23 +1,39 @@
 import json
-from flask import make_response, Response
-import os
+from flask import make_response
 from jama.json_factories import comment_factory
 from jama import api_caller
-from slack.slack_json_factories.comment_response_json import comment_response
+from slack.slack_json_factories.resp_json.comment import comment_response
 from slack import tools
+from jama import tools as jama_tools
+
+"""comment.py == Backbone of comment functionality
+
+There are two main functionaries present in this file:
+    1. Receiving formatted data from a dialog in Slack and posting to Jama
+    2. Receiving filtered/formatted data from inline interface and posting to Jama
+
+As the file name is states, these functions are the backbone for the ability to create
+an item from data that is input in Slack.
+
+Attributes:
+    None
+"""
 
 # Temporary store users that is using the comment dialog
 user_project_id_list = {}
 
-def from_dialog_comment(base_url, payload):
+
+def from_dialog(base_url, payload):
     """
-    Prepare the paylaod from slack
+    Prepare the payload from slack
     Remove the user from the list after they hit submit
     Comment at jama site
 
-    @params:
-        base_url -> jama instance base url
-        payload -> payload receive from slack
+    Args:
+        base_url (string): jama instance base url
+        payload (dict): payload receive from slack
+    Returns:
+        (dict): Returns JSON object with comment item url and status
     """
     global user_project_id_list
     post_id = payload["submission"]["item"]
@@ -28,111 +44,144 @@ def from_dialog_comment(base_url, payload):
         del user_project_id_list[(slack_team_id, slack_user_id)]
     return comment(base_url, slack_team_id, slack_user_id, post_id, comment_body)
 
+
 def get_projectID(base_url, start, teamID, userID):
     """
     Get all the project from jama
 
-    @params:
-        base_url -> jama instance base url
-        start -> start at a specific location
-        teamID -> user team ID, for OAuth
-        userID -> user ID, for OAuth
+    Args:
+        base_url (string): jama instance base url
+        start (int): start at a specific location
+        teamID (string): user team ID, for OAuth
+        userID (string): user ID, for OAuth
+    Returns:
+        (dict): Returns JSON object of the Jama API /projects
     """
     url = base_url + "/rest/latest/projects?startAt=" +\
           str(start) + "&maxResults=50"
     return api_caller.get(teamID, userID, url)
 
+
 def get_project_by_ID(base_url, projectID, teamID, userID):
     """
     Get the project from jama by project id
 
-    @params: 
-        base_url -> jama instance base url
-        projectID -> project id
-        teamID -> user team ID, for OAuth
-        userID -> user ID, for OAuth
+    Args:
+        base_url (string): jama instance base url
+        projectID (string): project id
+        teamID (string): user team ID, for OAuth
+        userID (string): user ID, for OAuth
+    Returns:
+        (dict): Returns JSON object of the Jama API /projects/{id}
     """
     url = base_url + "/rest/latest/projects/" + projectID
     return api_caller.get(teamID, userID, url)
+
 
 def get_item_by_ID(base_url, itemID, teamID, userID):
     """
     Get the item from jama by item id
 
-    @params: 
-        base_url -> jama instance base url
-        itemID -> item id
-        teamID -> user team ID, for OAuth
-        userID -> user ID, for OAuth
+    Args:
+        base_url (string): jama instance base url
+        itemID (string): item id
+        teamID (string): user team ID, for OAuth
+        userID (string): user ID, for OAuth
+    Returns:
+        (dict): Returns JSON object of the Jama API /abstractitems
     """
     url = base_url + "/rest/latest/abstractitems/" + itemID
     return api_caller.get(teamID, userID, url)
+
 
 def get_item(base_url, projectID, start, teamID, userID):
     """
     Get all the item from a project
 
-    @params: 
-        base_url -> jama instance base url
-        projectID -> project id
-        start -> start at a specific index
-        teamID -> user team ID, for OAuth
-        userID -> user ID, for OAuth
+    Args:
+        base_url (string): jama instance base url
+        projectID (int): project id
+        start (int): start at a specific index
+        teamID (string): user team ID, for OAuth
+        userID (string): user ID, for OAuth
+    Returns:
+        (dict): Returns JSON object of the Jama API /items
     """
     url = base_url + "/rest/latest/items?project=" + str(projectID) +\
-          "&startAt=" + str(start) + "&maxResults=50"
+        "&startAt=" + str(start) + "&maxResults=50"
     return api_caller.get(teamID, userID, url)
+
 
 def search_item(base_url, projectID, start, contains, teamID, userID):
     """
     Search a item from a project
 
-    @params: 
-        base_url -> jama instance base url
-        projectID -> project id
-        start -> start at a specific index
-        contains -> the keyword
-        teamID -> user team ID, for OAuth
-        userID -> user ID, for OAuth
+    Args:
+        base_url (string): jama instance base url
+        projectID (int): project id
+        start (int): start at a specific index
+        contains (string): the keyword
+        teamID (string): user team ID, for OAuth
+        userID (string): user ID, for OAuth
+    Returns:
+        (dict): Returns JSON object of the Jama API /abstractitems
     """
     url = base_url + "/rest/latest/abstractitems?project=" +\
           str(projectID) + "&contains=" + contains + "&startAt=" + str(start) + "&maxResults=50"
     return api_caller.get(teamID, userID, url)
 
-def comment_from_commandline(slack_team_id, slack_user_id, base_url, content):
+
+def from_inline(slack_team_id, slack_user_id, base_url, content):
     """
     Process input from slack massage and sent them to comment()
-    @params:
-        slack_team_id -> The slack team ID
-        slack_user_id -> The slack User ID, which is not the username!
-        base_url -> The Jama workspace base_url
-        content -> the user input content which is cut at routes.py
+    Args:
+        slack_team_id (string): The slack team ID
+        slack_user_id (string): The slack User ID, which is not the username!
+        base_url (string): The Jama workspace base_url
+        content (string): the user input content which is cut at routes.py
+    Returns:
+        (dict): Returns JSON object with commented item url and status
     """
     str_post_id, comment_body = tools.cutArgument(content, ",")
     return comment(base_url, slack_team_id, slack_user_id, str_post_id, comment_body)
 
+
 def comment(base_url, team_id, user_id, str_post_id, comment_body):
     """
     Comment by passing URL routes with query string
-    @params:
-        base_url -> The Jama workspace base_url
-        team_id -> Slack team ID
-        user_id -> Slack user ID
-        str_post_id -> a string format item id, which is the item user want to comment
-        comment_body -> the context user want to put into the comment
+    Args:
+        base_url (string): The Jama workspace base_url
+        team_id (string): Slack team ID
+        user_id (string): Slack user ID
+        str_post_id (string): a string format item id, which is the item user want to comment
+        comment_body (string): the context user want to put into the comment
+    Returns:
+        (dict): Returns JSON object with commented item url and status
     """
     post_id = tools.string_to_int(str_post_id)
     if post_id < 0 or comment_body == "":
         return comment_response(str_post_id, comment_body)
-    obj = comment_factory.generate_comment(post_id, tools.prepare_html(comment_body))
+
+    if api_caller.is_using_oauth():
+        header = ""
+    else:
+        header = jama_tools.prepare_writer_info(team_id, user_id, base_url, True)
+    comment_body = comment_body
+    obj = comment_factory.generate_comment(post_id, tools.prepare_html(header + comment_body))
     url = base_url + "/rest/latest/comments"
     response = api_caller.post(team_id, user_id, url, obj)
 
     return comment_response(str_post_id, comment_body, response)
-    
-def comment_inline(base_url, json_request):
+
+
+def dialog_option(base_url, json_request):
     """
     Handle dynamic options menu for dialog
+    Args:
+        base_url (string): The Jama workspace base_url
+        json_request (dict): Slack team ID
+    Returns:
+        (dict): Returns JSONed object of options to slack
     """
     value = json_request["value"]
     teamID = json_request["team"]["id"]
@@ -146,11 +195,19 @@ def comment_inline(base_url, json_request):
     else:
         return make_response("", 500)
 
+
 def dynamic_project_list(base_url, keyword, teamID, userID):
     """
     Fetch all the project from jama
     If user give empty input, shows first up to 100 projects
     If user enter keyword, search projects name using that keyword
+    Args:
+        base_url (string): The Jama workspace base_url
+        keyword (string): keyword of the project
+        teamID (string): Slack team ID
+        userID (string): Slack user ID
+    Returns:
+        (dict): Returns JSONed object of options to slack
     """
     options = []
     jama_json_response = get_projectID(base_url, 0, teamID, userID)
@@ -185,12 +242,19 @@ def dynamic_project_list(base_url, keyword, teamID, userID):
             "options": options_filtered[:100]
         }
         return make_response(json.dumps(slack_payload), 200)
-    return make_response("", 200)
+
 
 def dynamic_search_project(base_url, keyword, teamID, userID):
     """
     conform project
     user enter the project id, and search that project from jama
+    Args:
+        base_url (string): The Jama workspace base_url
+        keyword (string): keyword of the project
+        teamID (string): Slack team ID
+        userID (string): Slack user ID
+    Returns:
+        (dict): Returns JSONed object of options to slack
     """
     global user_project_id_list
     if keyword:
@@ -215,6 +279,13 @@ def dynamic_item_list(base_url, keyword, teamID, userID):
     If no user input, show first 50 items
     IF user input number, search item using it as item id
     IF user input something else, search item name with that keyword
+    Args:
+        base_url (string): The Jama workspace base_url
+        keyword (string): keyword of the item
+        teamID (string): Slack team ID
+        userID (string): Slack user ID
+    Returns:
+        (dict): Returns JSONed object of options to slack
     """
     global user_project_id_list
     if keyword == "":

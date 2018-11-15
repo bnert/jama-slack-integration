@@ -1,5 +1,6 @@
 import json
 
+
 def attachment_dialog(payload):
     """
     Create a dialog json to get more required data from user.

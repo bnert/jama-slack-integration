@@ -38,8 +38,20 @@ declare -rx URL_RULE=""
 # The URL of the Jama instance (e.g. https://xyz.jamacloud.com)
 declare -rx JAMA_URL=""
 
-# The username and password of the Jama user to act as. Hopefully we'll move to
-# OAuth soon, and this won't be necessary.
+# The information to connect to the database. This is necessary for using
+# the Jama OAuth system. If you do not uncomment these and fill them in,
+# the application will not be able to use the database. If you do not use
+# the Jama OAuth system, you need to comment this section.
+# DB_HOST is the address that the database server is running on (likely
+# localhost.) The rest are self-explanatory.
+#declare -rx DB_HOST=""
+#declare -rx DB_USER=""
+#declare -rx DB_PASS=""
+#declare -rx DB_NAME=""
+
+# The username and password of the Jama user to act as. If you want to use
+# the bot user to post item and comment, please make sure you commented out
+# the database setting.
 declare -rx JAMA_USER=""
 declare -rx JAMA_PASS=""
 
@@ -58,15 +70,5 @@ declare -rx SLACK_OAUTH_TOKEN=""
 # The server's SlackBot token. Necessary for the Slack Bot to work.
 declare -rx SLACK_BOT_TOKEN=""
 
-# The information necessary to connect to the database. If you do not uncomment
-# these and fill them in, the application will not be able to use the database,
-# which could stop it from performing certain tasks (currently, Jama-side
-# OAuth.)
-# DB_HOST is the address that the database server is running on (likely
-# localhost.) The rest are self-explanatory.
-#declare -rx DB_HOST=""
-#declare -rx DB_USER=""
-#declare -rx DB_PASS=""
-#declare -rx DB_NAME=""
 
 flask run --port=${SERVER_PORT}

@@ -1,6 +1,6 @@
 import requests
 from flask import make_response
-from jama import create
+from jama import comment
 
 
 def resolve_submit(base_url, payload):
@@ -16,6 +16,6 @@ def resolve_submit(base_url, payload):
     """
 
     requests.post(payload["response_url"],
-                  json=create.from_dialog(base_url, payload),
+                  json=comment.from_dialog(base_url, payload),
                   headers={"Content-Type": "application/json"})
     return make_response("", 200)

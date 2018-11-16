@@ -1,11 +1,14 @@
 import json
 
+
 def attachment_dialog(payload):
     """
     Create a dialog json to get more required data from user.
     https://api.slack.com/dialogs
-    @params:
-        payload: Slack action payload
+    Args:
+        payload(dict): Slack action payload
+    Returns:
+        (dict): A json object to Slack for opening the dialog.
     """
     description = payload["message"]["text"]
     files = []

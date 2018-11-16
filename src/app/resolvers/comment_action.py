@@ -1,21 +1,22 @@
-import requests
 from flask import make_response
-from jama import create
+from slack.slack_json_factories.dialog_json import comment
 
 
-def resolve_submit(base_url, payload):
+def resolve_submit(payload, slack_client):
     """Resolves dialog submission for creating an item in Jama.
 
     Arguments:
-        base_url (string): The base a Jama URL
         payload (JSON Object): Payload from dialog submission
+        slack_client (SlackClient Object): to invoke slack dialog
 
     Returns:
         Response (object): To make the response, we use make_response()
         from the flask library.
     """
 
-    requests.post(payload["response_url"],
-                  json=create.from_dialog(base_url, payload),
-                  headers={"Content-Type": "application/json"})
+    slack_client.api_call(
+        "dialog.open",
+        trigger_id=payload["trigger_id"],
+        dialog=comment.comment_dialog(payload)
+    )
     return make_response("", 200)

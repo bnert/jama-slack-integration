@@ -2,7 +2,10 @@ def comment_dialog(data=None):
     """
     Function takes in a JSON object, and uses the following format:
     https://api.slack.com/dialogs
-    Returns created JSON object, then is sent back to Slack.
+    Args:
+        data(dict): Slack action payload
+    Returns:
+        (dict): A json object to Slack for opening the dialog.
     """
     text = ""
     if data is not None:
@@ -52,7 +55,7 @@ def comment_dialog(data=None):
                 "type": "textarea",
                 "label": "Comment",
                 "name": "comment",
-                "value": ""
+                "value": text
             }
 
         ]

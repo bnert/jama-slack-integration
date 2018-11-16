@@ -1,6 +1,6 @@
-import requests
+import threading
 from flask import make_response
-from jama import create
+from jama import attachment
 
 
 def resolve_submit(base_url, payload):
@@ -15,7 +15,7 @@ def resolve_submit(base_url, payload):
         from the flask library.
     """
 
-    requests.post(payload["response_url"],
-                  json=create.from_dialog(base_url, payload),
-                  headers={"Content-Type": "application/json"})
+    thread = threading.Thread(target=attachment.dialog_attachment_thread,
+                              kwargs={"base_url": base_url, "data": payload})
+    thread.start()
     return make_response("", 200)

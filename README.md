@@ -22,7 +22,7 @@ Copyright © 2018 Jingyu Ye, Aleena Watson, Brent Soles, Bonden Lyons, Taisheng 
   * mysql-connector (Even if you don't use a database. You'll run into problems otherwise.)
 * (optional) For extra functionality (e.g. Jama-side OAuth), import "schema.sql" into a new database
   * This application was developed on and tested with a MariaDB server, but either that or MySQL should be fine.
-  * The import command should be something like `mysql -u <DB username> -p <DB name> < shema.sql` from the command line, or importing schema.sql from your GUI if you have one.
+  * The import command should be something like `mysql -u <DB username> -p <DB name> < schema.sql` from the command line, or importing schema.sql from your GUI if you have one.
 * For instructions on running the server, see src/run.sh.template
 
 ## Slack Side
@@ -107,6 +107,8 @@ following permission scopes by typing them into `Add permission by scope or API 
 |files:read|
 |bot|
 |commands|
+|users:read|
+|users:read.email|
 
 After you add all of the above scopes, click `Save Changes`.
 

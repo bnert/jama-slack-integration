@@ -3,11 +3,13 @@ def attachment_fail_response(item_id, description, response=None):
     Function takes in an item id, comment content, and a JSON object to create a message for Slack user.
     See below link for documentation:
     https://api.slack.com/docs/messages#composing_messages
-    @params:
-        item_id -> A string format item id, which is the item user want to attach file
-        description -> the content user want to put into the attachment description
-        response -> The response of jama API. This is not required if everything run well In this case,
-                    this function would assume the API calling process has an Oauth token error.
+    Args:
+        item_id (string): A string format item id, which is the item user want to attach file.
+        description (string): The content user want to put into the attachment description.
+        response (dict, None): The response of jama API. This is not required if everything run well In this case,
+                               this function would assume the API calling process has an Oauth token error.
+    Returns:
+        (dict): A JSON obj to Slack, which expend the failure.
     """
     # Base json for returning to slack
     resp = {
@@ -35,17 +37,17 @@ def attachment_fail_response(item_id, description, response=None):
                                          "\nMessage: " + response["meta"]["message"]
     return resp
 
+
 def attachment_success_response(item_id, description):
     """
     Function takes in an item id, comment content, and a JSON object to create a message for Slack user.
     See below link for documentation:
     https://api.slack.com/docs/messages#composing_messages
-    @params:
-        item_id -> A string format item id, which is the item user want to attach file
-        description -> the content user want to put into the attachment description
-        response -> The response of jama API. This is not required if everything run well
-                    In this case, this function would assume the API calling process has no
-                    error and create an success massage.
+    Args:
+        item_id (string): A string format item id, which is the item user want to attach file.
+        description (string): The content user want to put into the attachment description.
+    Returns:
+        (dict): A JSON obj to Slack, which has the item URL and the information
     """
     return {
         "text": "Successfully upload attachment to item (id: " + item_id + ")",
@@ -62,11 +64,14 @@ def attachment_success_response(item_id, description):
         ]
     } 
 
+
 def file_failure_response():
     """
     An error message for Slack user to expand the message they choose
     contains file that cannot be uploaded. See below link for documentation:
     https://api.slack.com/docs/messages#composing_messages
+    Returns:
+        (dict): A JSON obj to Slack, which expend the failure.
     """
     return {
         "text": "Error",

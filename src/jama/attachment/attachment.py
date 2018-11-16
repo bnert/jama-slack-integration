@@ -5,33 +5,45 @@ import json
 import requests
 from jama import api_caller
 from jama.json_factories import attachment_factory
-from slack.slack_json_factories.attachment_response_json import attachment_fail_response
-from slack.slack_json_factories.attachment_response_json import attachment_success_response
+from slack.slack_json_factories.resp_json.attachment import attachment_fail_response
+from slack.slack_json_factories.resp_json.attachment import attachment_success_response
 from slack import tools
+from jama import tools as jama_tools
+
 
 def dialog_attachment_thread(base_url, data):
     """
     From the dialog return data, put attachment to a Jama Item. This
     function is for threading, so that the dialog can close on time.
-    @params:
-        base_url -> jama base_url
-        data -> slack dialog payload
+    Args:
+        base_url (string): jama base_url
+        data (dict): slack dialog payload
+    Returns:
+        None
     """
     requests.post(data["response_url"],
                   json=dialog_attachment(base_url, data),
                   headers={"Content-Type": "application/json"})
 
+
 def dialog_attachment(base_url, data):
     """
     From the dialog return data, put attachment to Jama
-    @params:
-        base_url -> jama base_url
-        data -> slack dialog payload
+    Args:
+        base_url (string): jama base_url
+        data (dict): slack dialog payload
+    Returns:
+        (dict): A JSON object of the task's status for Slack User
     """
     item_id = data["submission"]["id"]
     description = data["submission"]["description"]
     team_id = data["team"]["id"]
     user_id = data["user"]["id"]
+    if api_caller.is_using_oauth():
+        header = ""
+    else:
+        header = jama_tools.prepare_writer_info(team_id, user_id, base_url, False)
+
     # get project id
     url = base_url + "/rest/latest/items/" + item_id
     response = api_caller.get(team_id, user_id, url)
@@ -39,27 +51,31 @@ def dialog_attachment(base_url, data):
         return attachment_fail_response(item_id, description, response)
     else:
         project_id = str(response["data"]["project"])
+
     # upload file
     file_list = json.loads(data["state"])
     for file in file_list:
         good, massage = put_attachment_jama(team_id, user_id, base_url, file["url"],
-                                            project_id, item_id, file["name"], description)
+                                            project_id, item_id, file["name"], header + description)
         if not good:
             return massage
     return attachment_success_response(item_id, description)
 
+
 def put_attachment_jama(team_id, user_id, base_url, file_url, project_id, item_id, file_name, description):
     """
     put attachment to a Jama item
-    @params:
-        team_id -> Slack team id, which can be found in the payload or requests
-        user_id -> Slack user id, which can be found in the payload or requests
-        base_url -> Jama base_url
-        file_url -> The slack file download url
-        project_id -> The Jama project ID of the item location
-        item_id -> The Jama item ID the user want to attach their file
-        file_name -> The file name
-        description -> The file description
+    Args:
+        team_id (string): Slack team id, which can be found in the payload or requests
+        user_id (string):Slack user id, which can be found in the payload or requests
+        base_url (string): Jama base_url
+        file_url (string): The slack file download url
+        project_id (string): The Jama project ID of the item location
+        item_id (string): The Jama item ID the user want to attach their file
+        file_name (string): The file name
+        description (string): The file description
+    Returns:
+        (bool, dict): The put_attachment is success or not. and A JSON object of the task's status for Slack User
     """
     # create attachment slot and get a attachment id
     create_att_json = attachment_factory.generate_attachment(file_name, description)
@@ -71,11 +87,12 @@ def put_attachment_jama(team_id, user_id, base_url, file_url, project_id, item_i
         attachment_id = response["meta"]["id"]
 
     # download file
-    file = tools.get_file(file_url)
+    file_data = tools.get_file(file_url)
 
     # upload file
     url = base_url + "/rest/latest/attachments/" + str(attachment_id) + "/file"
-    response = api_caller.put_file(team_id, user_id, url, file_name, file)
+    file = {"file": (file_name, file_data)}
+    response = api_caller.put_file(team_id, user_id, url, file)
     if response is None or response != 200:
         return False, attachment_fail_response(item_id, description, response)
 

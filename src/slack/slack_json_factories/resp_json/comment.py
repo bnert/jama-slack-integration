@@ -1,16 +1,19 @@
 from slack import tools
 
+
 def comment_response(item_id, comment, response=None):
     """
     Function takes in an item id, comment content, and a JSON object to create a message for slack user.
     json for slack:
     https://api.slack.com/docs/messages#composing_messages
-    @params:
-        item_id: A string format item id, which is the item user want to comment
-        comment: the content user want to put into the comment
-        response: The response of jama API post /comment. This is not required if there is no response
-                  from Jama. In this case, this function would assume the API calling process is stopped
-                  because of invalid user input and create an error massage.
+    Args:
+        item_id (string): A string format item id, which is the item user want to comment
+        comment (string): the content user want to put into the comment
+        response (dict): The response of jama API post /comment. This is not required if there is no response
+                         from Jama. In this case, this function would assume the API calling process is stopped
+                         because of invalid user input and create an error massage.
+    Returns:
+        (dict): A JSon object of a slack massage, which shows the status of the Jama comment.
     """
     # Base json for returning to slack
     resp = {

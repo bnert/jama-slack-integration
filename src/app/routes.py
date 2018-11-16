@@ -44,6 +44,7 @@ def jama_dialog():
     """
     if not rt_handle.verify_req(request):
         return make_response("", 401)
+    print("DIALOG")
     try:
         submit_payload = json.loads(request.form['payload'])
         return rt_handle.resolve_dialog_submit(base_url, submit_payload)
@@ -67,6 +68,7 @@ def jama_menu():
     """
     if not rt_handle.verify_req(request):
         return make_response("", 401)
+    print("MENU")
     try:
         submit_payload = json.loads(request.form["payload"])
         return rt_handle.resolve_menu_req(base_url, submit_payload)

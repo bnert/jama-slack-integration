@@ -11,11 +11,7 @@ def user_error(request):
     Raises:
         None
     """
-    now = datetime.now()
-    now = now.strftime("%Y-%m-%d %H:%M:%S")
-    print("{time}: Jama API ureachable.".format(
-        time=now
-    ))
+    
     return_to_slack(request, {
                     "text": "Oh no, there was an error with your inputs!",
                     "attachments": [

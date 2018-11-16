@@ -9,6 +9,7 @@ from jama import comment
 from jama import oauth
 from jama.tools import user_error
 from jama.tools import make_dict
+from jama.tools import commands_info
 from slack import tools
 
 from slack.slack_json_factories import oauth_dialog_json
@@ -152,7 +153,8 @@ def resolve_jama_req(base_url, req):
 
     elif (action == 'create'):
         if (content == ""):
-            return user_error(request)
+            return commands_info.create(request,
+            headline="There was an error with your inputs!")
 
         return create_req.resolve(base_url=base_url, 
                                 content=content,
@@ -175,9 +177,17 @@ def resolve_jama_req(base_url, req):
         return resolve_help_req(content)
 
     else:
-        return "Error: We can not recognize your command `" + action + "`.\nPlease check or try `help` command " + \
-               "for more information. If you want to add some argument to your command, please make sure adding " + \
-               "them after a `:` sign."
+        # If input from user is buggy
+        content = req.form["text"].strip()
+        if "comment" in content:
+            return commands_info.comment(request)
+        elif "create" in content:
+            return commands_info.create(request,
+            headline="There was an error with your command! Here is a quick guide to using `/jamaconnect create`:")
+        elif "search" in content:
+            return commands_info.search(request)
+        else:
+            return commands_info.all(request)
 
 
 ### Resolver functions
@@ -199,7 +209,8 @@ def resolve_search_req(base_url, content):
 
     except Exception as e:
         print(e)
-        return make_response("Invalid input! Usage: /jamaconnect search: key=[your search phrase]")
+        return commands_info.search(request,
+            headline="There was an error with your command! Here is a quick guide to using `/jamaconnect search`:")
 
 
 def resolve_display_req(base_url, content):
@@ -219,7 +230,8 @@ def resolve_display_req(base_url, content):
 
     except Exception as e:
         print(e)
-        return make_response("Invalid input! Usage: /jamaconnect display: id=[unique jama item ID]", 200)
+        return commands_info.search(request,
+            headline="There was an error with your command! Here is a quick guide to using `/jamaconnect display`:")
 
 
 def resolve_oauth_req(req, content):
@@ -250,4 +262,4 @@ def resolve_help_req(content):
         return help.help(content)
     except Exception as e:
         print(e)
-        return make_response("Input formatting error! Please check again!", 200)
+        return commands_info.all(request)

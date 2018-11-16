@@ -57,8 +57,8 @@ def from_dialog(url_base, json_to_parse):
             "text": "We're sorry, we had trouble handling your data.",
             "attachments": [
                 {
-                    "text": "Please give it another go!\n\n \
-                    If it doens't work, please submit a bug report"
+                    "text": """Please give it another go!
+                    If it doens't work, please submit a bug report"""
                 }
             ]
         }
@@ -85,9 +85,17 @@ def from_text(base_url, content_dict):
             "text": "Oh no, there was an error with your inputs!",
             "attachments": [
                 {
-                    "text": "example: /jamaconnect create: project=49 | name=project name | ...\n\
-                    - or to open a dialog -  \n\
-                    /jamaconnect create: dialog | project=<id>"
+                    "text": """Example usage of `/jamaconnect create`:
+\t`/jamaconnect create: dialog | project=<projectId>` brings up a dialog for
+\t\t\tthe top level items for the specified project, given the project's ID.
+\t---- or -----
+\t`/jamaconnect create: project=<projectID> | name=project name | ...` will
+\t\t\talso work, where `...` is other arguments, such as: `item=<itemID>`, or
+\t\t\t`description=your item description`.
+
+*Note: all fields with `<...>` around them are places you need to provide input. 
+If a field is an ID (e.g. projectID), it needs to be a number. Otherwise, it can be text.*
+                    """
                 }
             ]
         }

@@ -50,8 +50,10 @@ def _fields_array(project_id):
         None
     """
 
-    prj_data = _get_jama_project_items(project_id)
-    item_types = _get_jama_item_types()
+    item_types, types_obj = _get_jama_item_types() #used to map item id's in getting projects
+    #print(types_obj)
+    prj_data = _get_jama_project_items(project_id, types_obj)
+    #print("DONE")
     jama_users = _get_jama_users()
     
     return [
@@ -106,7 +108,7 @@ def _get_jama_project(project_id):
     return resp_json
 
 
-def _get_jama_project_items(project_id):
+def _get_jama_project_items(project_id, item_types):
     """GETs root items of a project
 
     Args:
@@ -125,17 +127,33 @@ def _get_jama_project_items(project_id):
     assert(200 == items_resp.status_code)
     project_items = json.loads(items_resp.text)
 
+    # Checks to see if childItemType is valid, if so, adds to the options
+    prj_items = []
+    for item in project_items["data"]:
+        if "childItemType" in item:
+            if str(item["childItemType"]) in item_types:
+                prj_items.append(
+                    {
+                        "label": item["fields"]["name"] + "( {type} )".format(type=item_types[str(item["childItemType"])]),
+                        # value is "child.parent", similar to jwt
+                        "value": "{item_id}.{project_id}".format(
+                            item_id=item["id"], project_id=item["project"]
+                            ) 
+                    }
+                )
+        else:
+            prj_items.append(
+                {
+                    "label": item["fields"]["name"] + "( {type} )".format(type=item_types[str(item["itemType"])]),
+                    "value": "{item_id}.{project_id}".format(
+                        item_id=item["id"], project_id=item["project"]
+                        ) 
+                }
+            )
+
     return {
     "label": project["data"]["fields"]["name"],
-    "options": [{
-            "label": item["fields"]["name"],
-            # value is "child.parent", similar to jwt
-            "value": "{item_id}.{project_id}".format(
-                item_id=item["id"], project_id=item["project"]
-                ) 
-            }
-            for item in project_items["data"]
-        ]
+    "options": prj_items
     }
 
 def _get_jama_item_types():
@@ -147,19 +165,26 @@ def _get_jama_item_types():
     Returns: 
         Array: objects of users data in the Jama instance
     """
-    url = os.environ['JAMA_URL'] + "/rest/latest/itemtypes"
+    url = os.environ['JAMA_URL'] + "/rest/latest/itemtypes?maxResults=50"
     resp = requests.get(url, auth=(os.environ["JAMA_USER"], os.environ["JAMA_PASS"]))
     
     assert(200 == resp.status_code)
     resp_json = json.loads(resp.text)
     
+    item_types = {}
+    for item in resp_json["data"]:
+        print(item["display"])
+        item_name = str(item["id"])
+        print(item_name)
+        item_types[item_name] = item["display"]
+
     # Returns an array of objects
     return [{
             "label": item["display"], 
             "value": item["id"] 
         } 
         for item in resp_json["data"] 
-    ]
+    ], item_types # Returns a tuple
 
 
 def _get_jama_users():

@@ -13,7 +13,7 @@ def post(team_id, user_id, url, payload):
         payload -> The dictionary of payload wants to be sent to the url
     """
     if "DB_HOST" in os.environ:
-        token = oauth.getAccessToken(team_id, user_id)
+        token = oauth.get_access_token(team_id, user_id)
         if token is None:
             return None
         header_list = {
@@ -34,7 +34,7 @@ def get(team_id, user_id, url):
         url -> Jama API url
     """
     if "DB_HOST" in os.environ:
-        token = oauth.getAccessToken(team_id, user_id)
+        token = oauth.get_access_token(team_id, user_id)
         if token is None:
             return None
         header_list = {
@@ -57,7 +57,7 @@ def put_file(team_id, user_id, url, file_name, file_data):
         file_data -> The file data wants to be sent to the url
     """
     if "DB_HOST" in os.environ:
-        token = oauth.getAccessToken(team_id, user_id)
+        token = oauth.get_access_token(team_id, user_id)
         if token is None:
             return None
         response = requests.put(url, files={"file": (file_name, file_data)}, headers={"Authorization": "Bearer " + token})

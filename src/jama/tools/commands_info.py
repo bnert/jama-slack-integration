@@ -91,7 +91,7 @@ def create(req, headline="Hey! Here is a quick guide to using `/jamaconnect crea
                         {
                             "text": """
 Create usage:
-    \t`/jamaconnect create: dialog | project=<projectId>` brings up a dialog for
+    \t`/jamaconnect create <projectId>` brings up a dialog for
     \t\t\tthe top level items for the specified project, given the project's ID.
     \t---- or -----
     \t`/jamaconnect create: project=<projectID> | name=project name | ...` will

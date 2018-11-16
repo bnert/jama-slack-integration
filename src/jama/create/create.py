@@ -86,7 +86,7 @@ def from_text(base_url, content_dict):
             "attachments": [
                 {
                     "text": """Example usage of `/jamaconnect create`:
-\t`/jamaconnect create: dialog | project=<projectId>` brings up a dialog for
+\t`/jamaconnect create: <projectId>` brings up a dialog for
 \t\t\tthe top level items for the specified project, given the project's ID.
 \t---- or -----
 \t`/jamaconnect create: project=<projectID> | name=project name | ...` will
@@ -122,7 +122,24 @@ If a field is an ID (e.g. projectID), it needs to be a number. Otherwise, it can
             to_post_obj["location"]["parent"]["project"] = int(content_dict["project"])
             to_post_obj["location"]["parent"].pop("item")
     except Exception:
-        return make_response("Error in user inputs", 500)
+        return {
+            "text": "Oh no, there was an error with your inputs!",
+            "attachments": [
+                {
+                    "text": """Example usage of `/jamaconnect create`:
+\t`/jamaconnect create: <projectId>` brings up a dialog for
+\t\t\tthe top level items for the specified project, given the project's ID.
+\t---- or -----
+\t`/jamaconnect create: project=<projectID> | name=project name | ...` will
+\t\t\talso work, where `...` is other arguments, such as: `item=<itemID>`, or
+\t\t\t`description=your item description`.
+
+*Note: all fields with `<...>` around them are places you need to provide input. 
+If a field is an ID (e.g. projectID), it needs to be a number. Otherwise, it can be text.*
+                    """
+                }
+            ]
+        }
         
 
     url = base_url + '/rest/latest/items/'

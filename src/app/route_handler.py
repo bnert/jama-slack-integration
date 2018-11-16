@@ -172,7 +172,10 @@ def resolve_jama_req(base_url, req):
     """
 
     # req.form = args from slash command
+    print(tools.cutArgument(req.form['text'], ':'))
     action, content = tools.cutArgument(req.form['text'], ':')
+    print(action)
+    print(content)
     action = action.strip().lower()
     content = content.strip()
 
@@ -185,10 +188,15 @@ def resolve_jama_req(base_url, req):
         print('DISPLAY')
         return resolve_display_req(base_url, content)
 
-    elif (action == 'create'):
+    elif 'create' in action:
         if (content == ""):
-            return commands_info.create(request,
-            headline="There was an error with your inputs!")
+            try:
+                content = action.split(' ')[1]
+                content = content.strip()
+                content = int(content)
+            except:
+                return commands_info.create(request,
+                headline="There was an error with your inputs!")
 
         return create_req.resolve(base_url=base_url, 
                                 content=content,

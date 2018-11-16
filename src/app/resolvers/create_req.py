@@ -25,7 +25,7 @@ def resolve(base_url, content, slack_client, request):
     Raises:
         AssertionError:
             This type of exception happens when trying to gather data from
-            the Jama API to return to the Slacki dialog API call.
+            the Jama API to return to the Slack dialog API call.
         Exception:
             On any error with parsing user data, we throw a general
             exception and return make_response() with either 400 or 500
@@ -50,7 +50,7 @@ def resolve(base_url, content, slack_client, request):
             )
 
         except AssertionError:
-            return api_error(request)
+            return api_error(request, "create")
             
         except Exception as err:
             # Returns error message to user & 400 status

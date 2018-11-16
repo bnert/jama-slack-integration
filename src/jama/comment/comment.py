@@ -131,19 +131,19 @@ def search_item(base_url, projectID, start, contains, teamID, userID):
     return api_caller.get(teamID, userID, url)
 
 
-def from_inline(slack_team_id, slack_user_id, base_url, content):
+def from_inline(slack_team_id, slack_user_id, base_url, args):
     """
     Process input from slack massage and sent them to comment()
     Args:
         slack_team_id (string): The slack team ID
         slack_user_id (string): The slack User ID, which is not the username!
         base_url (string): The Jama workspace base_url
-        content (string): the user input content which is cut at routes.py
+        args (dict): the user input content which is cut at routes.py
     Returns:
         (dict): Returns JSON object with commented item url and status
     """
-    str_post_id, comment_body = tools.cutArgument(content, ",")
-    return comment(base_url, slack_team_id, slack_user_id, str_post_id, comment_body)
+    # str_post_id, comment_body = tools.cutArgument(content, ",")
+    return comment(base_url, slack_team_id, slack_user_id, args["id"], args["comment"])
 
 
 def comment(base_url, team_id, user_id, str_post_id, comment_body):

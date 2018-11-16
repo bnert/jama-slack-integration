@@ -23,7 +23,7 @@ def all(req):
 1. Comment:
     \t`/jamaconnect comment` brings up a dialog to comment on an item.
     \t---- or -----
-    \t`/jamaconnect comment: <itemID>, <commentBody>` will also work.
+    \t`/jamaconnect comment: id=<item ID>| comment=<comment context>` will also work.
 
 2. Create:
     \t`/jamaconnect create: dialog | project=<projectId>` brings up a dialog for
@@ -65,7 +65,7 @@ def comment(req, headline="Hey! Here is a quick guide to using `/jamaconnect com
 Comment usage:
     \t`/jamaconnect comment` brings up a dialog to comment on an item.
     \t---- or -----
-    \t`/jamaconnect comment: <itemID>, <commentBody>` will also work.
+    \t`/jamaconnect comment: id=<item ID>| comment=<comment context>` will also work.
 
 *Note: all fields with `<...>` around them are places you need to provide input. 
 If a field is an ID (e.g. projectID), it needs to be a number. Otherwise, it can be text.*

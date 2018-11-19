@@ -5,16 +5,14 @@ def attachment_dialog(payload):
     """
     Create a dialog json to get more required data from user.
     https://api.slack.com/dialogs
-    Args:
-        payload(dict): Slack action payload
-    Returns:
-        (dict): A json object to Slack for opening the dialog.
+    @params:
+        payload: Slack action payload
     """
     description = payload["message"]["text"]
     files = []
     if "files" in payload["message"]:
         for file in payload["message"]["files"]:
-            if file["mode"] == "hosted":
+            if file["mode"] != "tombstone" and "url_private_download" in file:
                 files.append({"name": file["name"], "url": file["url_private_download"]})
     if len(files) == 0:
         return None

@@ -11,6 +11,7 @@ Copyright © 2018 Jingyu Ye, Aleena Watson, Brent Soles, Bonden Lyons, Taisheng 
 # Build Instructions
 
 ## Server Side
+This project has been tested using Python version 3.7.1. We strongly recommend using a [Python virtual environment](https://docs.python.org/3/tutorial/venv.html) to manage dependencies.
 * Pull down code
 * (optional) Create a virtual environment 
   * `pip install virtualenv`, probably

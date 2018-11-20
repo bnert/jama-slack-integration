@@ -1,4 +1,5 @@
 from jama import api_caller
+from slack import tools
 
 def get_projectID(base_url, start, teamID, userID):
     """
@@ -29,7 +30,7 @@ def get_project_by_ID(base_url, projectID, teamID, userID):
     Returns:
         (dict): Returns JSON object of the Jama API /projects/{id}
     """
-    url = base_url + "/rest/latest/projects/" + projectID
+    url = base_url + "/rest/latest/projects/" + str(projectID)
     return api_caller.get(teamID, userID, url)
 
 
@@ -45,7 +46,7 @@ def get_item_by_ID(base_url, itemID, teamID, userID):
     Returns:
         (dict): Returns JSON object of the Jama API /abstractitems
     """
-    url = base_url + "/rest/latest/abstractitems/" + itemID
+    url = base_url + "/rest/latest/abstractitems/" + str(itemID)
     return api_caller.get(teamID, userID, url)
 
 

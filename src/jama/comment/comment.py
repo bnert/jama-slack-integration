@@ -100,12 +100,13 @@ def dialog_option(base_url, json_request):
     value = json_request["value"]
     teamID = json_request["team"]["id"]
     userID = json_request["user"]["id"]
+    state = json_request["state"]
     if json_request["name"] == "project":
         return dynamic_project_list(base_url, value, teamID, userID)
     elif json_request["name"] == "project_id":
         return dynamic_search_project(base_url, value, teamID, userID)
     elif json_request["name"] == "item":
-        return dynamic_item_list(base_url, value, teamID, userID)
+        return dynamic_item_list(base_url, value, teamID, userID, state)
     else:
         return make_response("", 500)
 
@@ -188,7 +189,7 @@ def dynamic_search_project(base_url, keyword, teamID, userID):
     return make_response("", 500)
 
 
-def dynamic_item_list(base_url, keyword, teamID, userID):
+def dynamic_item_list(base_url, keyword, teamID, userID, state):
     """
     If no user input, show first 50 items
     IF user input number, search item using it as item id
@@ -206,9 +207,12 @@ def dynamic_item_list(base_url, keyword, teamID, userID):
         """
         No user input, show the first 50 items
         """
-        if not (teamID, userID) in user_project_id_list:
+        if (teamID, userID) in user_project_id_list:
+            project_id = user_project_id_list[(teamID, userID)]
+        elif not state == "":
+            project_id = state
+        else:
             return make_response("", 500)
-        project_id = user_project_id_list[(teamID, userID)]
         jama_json_response = jama_tools.get_item(base_url, project_id, 0, teamID, userID)
         if jama_json_response["meta"]["status"] == "OK":
             options = []

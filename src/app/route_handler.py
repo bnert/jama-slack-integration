@@ -11,6 +11,7 @@ from jama.tools import user_error
 from jama.tools import make_dict
 from jama.tools import commands_info
 from slack import tools
+from slack import bot
 
 from slack.slack_json_factories import oauth_dialog_json
 
@@ -99,8 +100,16 @@ def resolve_dialog_submit(base_url, payload):
             return attachment_action.resolve_submit(payload, slack_client)
         elif payload["callback_id"] == "comment":
             return comment_action.resolve_submit(payload, slack_client)
-    else:
-        return make_response("", 500)
+        else:
+            return make_response("", 500)
+
+    if payload["type"] == "interactive_message":
+        if payload["callback_id"] == "bot_project":
+            return bot_button.resolve_submit_project(payload, slack_client)
+        elif payload["callback_id"] == "bot_item":
+            return bot_button.resolve_submit_item(payload, slack_client)
+        else:
+            return make_response("", 500)
 
 
 # Handlers for /jama/menu/
@@ -271,3 +280,21 @@ def resolve_help_req(content):
     except Exception as e:
         print(e)
         return commands_info.all(request)
+
+def resolve_bot_req(base_url, payload):
+    """Resolves bot event subscriptions from Slack.
+       First time setup the bot url will need to return the challenge to slack
+
+    Arguments:
+        base_url -> url to pass down
+        payload -> json to pass off
+    """
+    try:
+        if os.environ["SETUP_BOT"] == "yes":
+            submit_payload = request.get_json()
+            return submit_payload["challenge"]
+        else:
+            return bot.event(base_url, payload, slack_client)
+    except Exception as e:
+        print(e)
+        return make_response("", 500)

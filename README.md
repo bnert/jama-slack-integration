@@ -103,10 +103,11 @@ hosting server is `https://www.jama.com` and the `URL_RULE` section in
 Note: the URL should not have a trailing slash. When you set up this
 URL the first time, slack will need to verify the URL. You can change
 `SETUP_BOT` in `src/run.sh` to `on` to pass the verification. Once you
-have passed that, you can change it to `off` in later use.
-3. In the `Subscribe to Bot Events` section, you need to add bot user event.
-This will effect the range of message that the Bot user can listen from.
-recommendation:
+have passed that, you can change it to `off` in later use. 
+3. In the `Subscribe to Bot Events` section, you need to add bot user event. 
+This will effect the range of message that the Bot user can listen from. 
+Recommendation:
+
 | Event Name | Note |
 -|-
 |message.channels | Bot can listen when a new message has posted to a public channel.|

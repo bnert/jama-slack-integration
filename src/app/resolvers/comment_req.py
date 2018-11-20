@@ -8,7 +8,6 @@ from slack.slack_json_factories.dialog_json import comment as dialog
 from jama.comment.comment import user_project_id_list
 
 
-
 def resolve(base_url, content, slack_client, request):
     """Resolves which create functionality (text/dialog) to invoke.
 

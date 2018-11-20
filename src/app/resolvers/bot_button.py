@@ -17,7 +17,6 @@ def resolve_submit_project(payload, slack_client):
         from the flask library.
     """
 
-    print(payload)
     global user_project_id_list
     if payload["actions"][0]["name"] == "comment":
         slack_team_id = payload["team"]["id"]

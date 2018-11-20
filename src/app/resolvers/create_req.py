@@ -4,7 +4,7 @@ from jama import create
 from slack import tools
 from jama.tools import make_dict
 from jama.tools import commands_info
-from jama.tools import api_error
+from jama.tools import user_error
 from slack.slack_json_factories import create_fields
 from slack.slack_json_factories import created_item
 

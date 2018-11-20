@@ -3,6 +3,7 @@ import json
 import requests
 from flask import make_response
 from jama.json_factories import item_factory
+from jama import oauth
 from slack.slack_json_factories.resp_json import created_item
 from slack import tools
 from pprint import pprint
@@ -35,6 +36,8 @@ def from_dialog(url_base, json_to_parse):
     """
     try:
         sub_data = json_to_parse["submission"]
+        team_id = json_to_parse["team"]["id"]
+        user_id = json_to_parse["user"]["id"]
         jama_url = url_base + '/rest/latest/items?setGlobalIdManually=false'
 
         to_post_obj = item_factory.generate_item()
@@ -46,10 +49,17 @@ def from_dialog(url_base, json_to_parse):
         to_post_obj["itemType"] = int(sub_data["itemType"])
         to_post_obj["fields"]["name"] = sub_data["newItemName"]
         to_post_obj["fields"]["description"] = sub_data["description"]
-        to_post_obj["fields"]["assignedTo"] = sub_data["asignee"]
 
-        jama_resp = requests.post(jama_url, json=to_post_obj, auth=(os.environ['JAMA_USER'], os.environ['JAMA_PASS']))
-            
+        if "DB_HOST" not in os.environ:
+            jama_resp = requests.post(jama_url, json=to_post_obj, auth=(os.environ['JAMA_USER'], os.environ['JAMA_PASS']))
+        else:
+            token = oauth.get_access_token(team_id, user_id)
+            header = {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer {token}".format(token=token)
+            }
+            jama_resp = requests.post(jama_url, json=to_post_obj, headers=header)
+
         return created_item.resp_json(json.loads(jama_resp.text), to_post_obj["project"])
     except Exception as err:
         print(err)
@@ -143,8 +153,15 @@ If a field is an ID (e.g. projectID), it needs to be a number. Otherwise, it can
         
 
     url = base_url + '/rest/latest/items/'
-    jama_resp = requests.post(
-        url, json=to_post_obj, auth=(os.environ['JAMA_USER'], os.environ['JAMA_PASS']))
+    if "DB_HOST" not in os.environ:
+        jama_resp = requests.post(jama_url, json=to_post_obj, auth=(os.environ['JAMA_USER'], os.environ['JAMA_PASS']))
+    else:
+        token = oauth.get_access_token(team_id, user_id)
+        header = {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer {token}".format(token=token)
+        }
+        jama_resp = requests.post(jama_url, json=to_post_obj, headers=header)
 
     # Returns json object w/ url of new item
     return created_item.resp_json(json.loads(jama_resp.text), to_post_obj["project"])

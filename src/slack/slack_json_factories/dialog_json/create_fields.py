@@ -51,10 +51,7 @@ def _fields_array(project_id):
     """
 
     item_types, types_obj = _get_jama_item_types() #used to map item id's in getting projects
-    #print(types_obj)
     prj_data = _get_jama_project_items(project_id, types_obj)
-    #print("DONE")
-    jama_users = _get_jama_users()
     
     return [
         {
@@ -76,12 +73,6 @@ def _fields_array(project_id):
             "label": "New Item Name",
             "type": "text",
             "name": "newItemName",
-        },
-        {
-            "label": "asignee",
-            "type": "select",
-            "name": "asignee",
-            "options": jama_users
         },
         {
             "label": "Description",
@@ -173,9 +164,7 @@ def _get_jama_item_types():
     
     item_types = {}
     for item in resp_json["data"]:
-        print(item["display"])
         item_name = str(item["id"])
-        print(item_name)
         item_types[item_name] = item["display"]
 
     # Returns an array of objects
@@ -185,24 +174,3 @@ def _get_jama_item_types():
         } 
         for item in resp_json["data"] 
     ], item_types # Returns a tuple
-
-
-def _get_jama_users():
-    """GETs
-    Args:
-        none
-
-    Returns: 
-        Array: Object with data of current users in the Jama instance
-    """
-    url = os.environ['JAMA_URL'] + "/rest/latest/users"
-    resp = requests.get(url, auth=(os.environ["JAMA_USER"], os.environ["JAMA_PASS"]))
-    
-    assert(200 == resp.status_code)
-    resp_json = json.loads(resp.text)
-
-    return [{
-            "label": item["username"],
-            "value": item["id"]
-        } for item in resp_json["data"]
-    ]

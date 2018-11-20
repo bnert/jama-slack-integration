@@ -4,7 +4,7 @@ def project_response(projectID, project_name):
     """Packages a response attachments to send to slack
 
     Function takes in a projectID, and uses the following format at
-    the following link:
+    the following links:
         https://api.slack.com/docs/messages#composing_messages
         https://api.slack.com/docs/message-attachments
 

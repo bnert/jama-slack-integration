@@ -255,9 +255,12 @@ def dynamic_item_list(base_url, keyword, teamID, userID, state):
         Search item with the user input
         Load the result, and only return the item with keywort in its name
         """
-        if not (teamID, userID) in user_project_id_list:
+        if (teamID, userID) in user_project_id_list:
+            project_id = user_project_id_list[(teamID, userID)]
+        elif not state == "":
+            project_id = state
+        else:
             return make_response("", 500)
-        project_id = user_project_id_list[(teamID, userID)]
         keyword = keyword.lower()
         jama_json_response = jama_tools.search_item(base_url, project_id, 0, keyword, teamID, userID)
         result_count = jama_json_response["meta"]["pageInfo"]["resultCount"]

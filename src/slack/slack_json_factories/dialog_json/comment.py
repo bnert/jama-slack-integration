@@ -51,7 +51,7 @@ def comment_dialog(data=None):
         "callback_id": "comment",
         "elements": [
             {
-                "label": "Project Reference ONLY:",
+                "label": "Search Projects:",
                 "type": "select",
                 "name": "project",
                 "optional": "true",

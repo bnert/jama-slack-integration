@@ -35,7 +35,6 @@ def resolve(base_url, content, slack_client, request):
         # Makes sure content is an int
         # content is the projectID
         try:
-            print(content)
             # opens dialog, pointless to have nested function
             slack_client.api_call(
                 "dialog.open",
@@ -56,6 +55,15 @@ def resolve(base_url, content, slack_client, request):
     else:
         try:
             content_dict = make_dict(content)
+            team_user_ids = {
+                "team": {
+                    "id": request.form["team_id"]
+                },
+                "user": {
+                    "id": request.form["user_id"]
+                }
+            }
+            content_dict.update(team_user_ids)
             item_create_response = create.from_text(base_url, content_dict)
             tools.return_to_slack(request, item_create_response)
         except Exception as err:

@@ -50,8 +50,8 @@ def _fields_array(project_id):
         None
     """
 
-    item_types, types_obj = _get_jama_item_types() #used to map item id's in getting projects
-    prj_data = _get_jama_project_items(project_id, types_obj)
+    #item_types, types_obj = _get_jama_item_types() #used to map item id's in getting projects
+    prj_data = _get_jama_project_items(project_id)
     
     return [
         {
@@ -63,12 +63,12 @@ def _fields_array(project_id):
             ]
                   
         },
-        {
-            "label": "Item Type",
-            "type": "select",
-            "name": "itemType",
-            "options": item_types
-        },
+        # {
+        #     "label": "Item Type",
+        #     "type": "select",
+        #     "name": "itemType",
+        #     "options": item_types
+        # },
         {
             "label": "New Item Name",
             "type": "text",
@@ -99,7 +99,7 @@ def _get_jama_project(project_id):
     return resp_json
 
 
-def _get_jama_project_items(project_id, item_types):
+def _get_jama_project_items(project_id):
     """GETs root items of a project
 
     Args:
@@ -122,22 +122,25 @@ def _get_jama_project_items(project_id, item_types):
     prj_items = []
     for item in project_items["data"]:
         if "childItemType" in item:
-            if str(item["childItemType"]) in item_types:
-                prj_items.append(
-                    {
-                        "label": item["fields"]["name"] + "( {type} )".format(type=item_types[str(item["childItemType"])]),
-                        # value is "child.parent", similar to jwt
-                        "value": "{item_id}.{project_id}".format(
-                            item_id=item["id"], project_id=item["project"]
-                            ) 
-                    }
-                )
+            prj_items.append(
+                {
+                    "label": item["fields"]["name"],
+                    # value is "child.parent", similar to jwt
+                    "value": "{item_id}.{project_id}.{item_type}".format(
+                        item_id=item["id"], 
+                        project_id=item["project"],
+                        item_type=item["childItemType"]
+                        ) 
+                }
+            )
         else:
             prj_items.append(
                 {
-                    "label": item["fields"]["name"] + "( {type} )".format(type=item_types[str(item["itemType"])]),
-                    "value": "{item_id}.{project_id}".format(
-                        item_id=item["id"], project_id=item["project"]
+                    "label": item["fields"]["name"],
+                    "value": "{item_id}.{project_id}.{item_type}".format(
+                        item_id=item["id"], 
+                        project_id=item["project"],
+                        item_type=item["itemType"]
                         ) 
                 }
             )

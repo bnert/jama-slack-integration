@@ -34,7 +34,7 @@ def event(base_url, payload, slack_client):
     """
     if payload["event"].get("bot_id") or payload["event"].get("message", {}).get("bot_id"):
         return make_response("", 200)
-    number = map(int, re.findall(r'\d+', payload["event"]["text"]))
+    number = filter_number(payload["event"]["text"])
     teamID = tools.string_to_int(payload["team_id"])
     userID = tools.string_to_int(payload["event"]["user"])
     for num in number:
@@ -94,3 +94,12 @@ def item_mentioned(payload, jama_json_response, sc):
         attachments=bot.item_response(itemID, item_name)
     )
     return make_response("", 200)
+
+def filter_number(text):
+    number = re.findall(r"\d+", text)
+    time = re.findall(r"\d+", " ".join(re.findall(r"(\d+:\d+)", text)))
+    big_num = re.findall(r"\d+", " ".join(re.findall(r"(\d*[,]\d{3})", text)))
+    ID = re.findall(r"\d+", " ".join(re.findall(r"(<@\w+>)", text)))
+    for i in (time+big_num+ID):
+        number.remove(i)
+    return number

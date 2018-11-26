@@ -5,6 +5,7 @@ from . import create_dialog
 from . import comment_action
 from . import comment_req
 from . import comment_dialog
+from . import bot_button
 
 """Resolver module def
 

@@ -45,92 +45,6 @@ def from_dialog(base_url, payload):
     return comment(base_url, slack_team_id, slack_user_id, post_id, comment_body)
 
 
-def get_projectID(base_url, start, teamID, userID):
-    """
-    Get all the project from jama
-
-    Args:
-        base_url (string): jama instance base url
-        start (int): start at a specific location
-        teamID (string): user team ID, for OAuth
-        userID (string): user ID, for OAuth
-    Returns:
-        (dict): Returns JSON object of the Jama API /projects
-    """
-    url = base_url + "/rest/latest/projects?startAt=" +\
-          str(start) + "&maxResults=50"
-    return api_caller.get(teamID, userID, url)
-
-
-def get_project_by_ID(base_url, projectID, teamID, userID):
-    """
-    Get the project from jama by project id
-
-    Args:
-        base_url (string): jama instance base url
-        projectID (string): project id
-        teamID (string): user team ID, for OAuth
-        userID (string): user ID, for OAuth
-    Returns:
-        (dict): Returns JSON object of the Jama API /projects/{id}
-    """
-    url = base_url + "/rest/latest/projects/" + projectID
-    return api_caller.get(teamID, userID, url)
-
-
-def get_item_by_ID(base_url, itemID, teamID, userID):
-    """
-    Get the item from jama by item id
-
-    Args:
-        base_url (string): jama instance base url
-        itemID (string): item id
-        teamID (string): user team ID, for OAuth
-        userID (string): user ID, for OAuth
-    Returns:
-        (dict): Returns JSON object of the Jama API /abstractitems
-    """
-    url = base_url + "/rest/latest/abstractitems/" + itemID
-    return api_caller.get(teamID, userID, url)
-
-
-def get_item(base_url, projectID, start, teamID, userID):
-    """
-    Get all the item from a project
-
-    Args:
-        base_url (string): jama instance base url
-        projectID (int): project id
-        start (int): start at a specific index
-        teamID (string): user team ID, for OAuth
-        userID (string): user ID, for OAuth
-    Returns:
-        (dict): Returns JSON object of the Jama API /items
-    """
-    url = base_url + "/rest/latest/items?project=" + str(projectID) +\
-        "&startAt=" + str(start) + "&maxResults=50"
-    return api_caller.get(teamID, userID, url)
-
-
-def search_item(base_url, projectID, start, contains, teamID, userID):
-    """
-    Search a item from a project
-
-    Args:
-        base_url (string): jama instance base url
-        projectID (int): project id
-        start (int): start at a specific index
-        contains (string): the keyword
-        teamID (string): user team ID, for OAuth
-        userID (string): user ID, for OAuth
-    Returns:
-        (dict): Returns JSON object of the Jama API /abstractitems
-    """
-    url = base_url + "/rest/latest/abstractitems?project=" +\
-          str(projectID) + "&contains=" + contains + "&startAt=" + str(start) + "&maxResults=50"
-    return api_caller.get(teamID, userID, url)
-
-
 def from_inline(slack_team_id, slack_user_id, base_url, args):
     """
     Process input from slack massage and sent them to comment()
@@ -186,12 +100,13 @@ def dialog_option(base_url, json_request):
     value = json_request["value"]
     teamID = json_request["team"]["id"]
     userID = json_request["user"]["id"]
+    state = json_request["state"]
     if json_request["name"] == "project":
         return dynamic_project_list(base_url, value, teamID, userID)
     elif json_request["name"] == "project_id":
         return dynamic_search_project(base_url, value, teamID, userID)
     elif json_request["name"] == "item":
-        return dynamic_item_list(base_url, value, teamID, userID)
+        return dynamic_item_list(base_url, value, teamID, userID, state)
     else:
         return make_response("", 500)
 
@@ -210,7 +125,7 @@ def dynamic_project_list(base_url, keyword, teamID, userID):
         (dict): Returns JSONed object of options to slack
     """
     options = []
-    jama_json_response = get_projectID(base_url, 0, teamID, userID)
+    jama_json_response = jama_tools.get_projectID(base_url, 0, teamID, userID)
     total_results = jama_json_response["meta"]["pageInfo"]["totalResults"]
     result_count = jama_json_response["meta"]["pageInfo"]["resultCount"]
     index = 0
@@ -224,7 +139,7 @@ def dynamic_project_list(base_url, keyword, teamID, userID):
         index += 50
         if index >= total_results:
             break
-        jama_json_response = get_projectID(base_url, index, teamID, userID)
+        jama_json_response = jama_tools.get_projectID(base_url, index, teamID, userID)
         result_count = jama_json_response["meta"]["pageInfo"]["resultCount"]
         
     if keyword == "":
@@ -258,7 +173,7 @@ def dynamic_search_project(base_url, keyword, teamID, userID):
     """
     global user_project_id_list
     if keyword:
-        jama_json_response = get_project_by_ID(base_url, keyword, teamID, userID)
+        jama_json_response = jama_tools.get_project_by_ID(base_url, keyword, teamID, userID)
         if jama_json_response["meta"]["status"] == "OK":
             user_project_id_list[(teamID, userID)] = keyword
             options = []  # Show optins on Slack dialog
@@ -274,7 +189,7 @@ def dynamic_search_project(base_url, keyword, teamID, userID):
     return make_response("", 500)
 
 
-def dynamic_item_list(base_url, keyword, teamID, userID):
+def dynamic_item_list(base_url, keyword, teamID, userID, state):
     """
     If no user input, show first 50 items
     IF user input number, search item using it as item id
@@ -292,10 +207,13 @@ def dynamic_item_list(base_url, keyword, teamID, userID):
         """
         No user input, show the first 50 items
         """
-        if not (teamID, userID) in user_project_id_list:
+        if (teamID, userID) in user_project_id_list:
+            project_id = user_project_id_list[(teamID, userID)]
+        elif not state == "":
+            project_id = state
+        else:
             return make_response("", 500)
-        project_id = user_project_id_list[(teamID, userID)]
-        jama_json_response = get_item(base_url, project_id, 0, teamID, userID)
+        jama_json_response = jama_tools.get_item(base_url, project_id, 0, teamID, userID)
         if jama_json_response["meta"]["status"] == "OK":
             options = []
             total_results = jama_json_response["meta"]["pageInfo"]["totalResults"]
@@ -316,7 +234,7 @@ def dynamic_item_list(base_url, keyword, teamID, userID):
         """
         User types in number for item ID for item in Jama.
         """
-        jama_json_response = get_item_by_ID(base_url, keyword, teamID, userID)
+        jama_json_response = jama_tools.get_item_by_ID(base_url, keyword, teamID, userID)
         if jama_json_response["meta"]["status"] == "OK":
             options = []  # Show optins on Slack dialog
             buffer = {}
@@ -337,11 +255,14 @@ def dynamic_item_list(base_url, keyword, teamID, userID):
         Search item with the user input
         Load the result, and only return the item with keywort in its name
         """
-        if not (teamID, userID) in user_project_id_list:
+        if (teamID, userID) in user_project_id_list:
+            project_id = user_project_id_list[(teamID, userID)]
+        elif not state == "":
+            project_id = state
+        else:
             return make_response("", 500)
-        project_id = user_project_id_list[(teamID, userID)]
         keyword = keyword.lower()
-        jama_json_response = search_item(base_url, project_id, 0, keyword, teamID, userID)
+        jama_json_response = jama_tools.search_item(base_url, project_id, 0, keyword, teamID, userID)
         result_count = jama_json_response["meta"]["pageInfo"]["resultCount"]
         total_results = jama_json_response["meta"]["pageInfo"]["totalResults"]
         index = 0
@@ -358,7 +279,7 @@ def dynamic_item_list(base_url, keyword, teamID, userID):
             index += 50
             if index >= total_results:
                 break
-            jama_json_response = search_item(base_url, project_id, index, keyword)
+            jama_json_response = jama_tools.search_item(base_url, project_id, index, keyword)
             result_count = jama_json_response["meta"]["pageInfo"]["resultCount"]
         slack_payload = {
             "options": options_filtered[:100]

@@ -42,25 +42,25 @@ def from_dialog(base_url, payload):
     slack_user_id = payload["user"]["id"]
     if (slack_team_id, slack_user_id) in user_project_id_list:
         del user_project_id_list[(slack_team_id, slack_user_id)]
-    return comment(base_url, slack_team_id, slack_user_id, post_id, comment_body)
+    return to_jama(base_url, slack_team_id, slack_user_id, post_id, comment_body)
 
 
-def from_inline(slack_team_id, slack_user_id, base_url, args):
+def from_inline(slack_team_id, slack_user_id, base_url, content):
     """
     Process input from slack massage and sent them to comment()
     Args:
         slack_team_id (string): The slack team ID
         slack_user_id (string): The slack User ID, which is not the username!
         base_url (string): The Jama workspace base_url
-        args (dict): the user input content which is cut at routes.py
+        content (string): the user input content
     Returns:
         (dict): Returns JSON object with commented item url and status
     """
-    # str_post_id, comment_body = tools.cutArgument(content, ",")
-    return comment(base_url, slack_team_id, slack_user_id, args["id"], args["comment"])
+    str_post_id, comment_body = tools.cutArgument(content, "|")
+    return to_jama(base_url, slack_team_id, slack_user_id, str_post_id, comment_body)
 
 
-def comment(base_url, team_id, user_id, str_post_id, comment_body):
+def to_jama(base_url, team_id, user_id, str_post_id, comment_body):
     """
     Comment by passing URL routes with query string
     Args:
@@ -199,6 +199,7 @@ def dynamic_item_list(base_url, keyword, teamID, userID, state):
         keyword (string): keyword of the item
         teamID (string): Slack team ID
         userID (string): Slack user ID
+        state (string): The id of the project which user want to search.
     Returns:
         (dict): Returns JSONed object of options to slack
     """

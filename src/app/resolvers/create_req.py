@@ -3,8 +3,8 @@ from flask import make_response
 from jama import create
 from slack import tools
 from jama.tools import make_dict
+from jama.tools import commands_info
 from jama.tools import user_error
-from jama.tools import api_error
 from slack.slack_json_factories import create_fields
 from slack.slack_json_factories import created_item
 
@@ -30,39 +30,45 @@ def resolve(base_url, content, slack_client, request):
             On any error with parsing user data, we throw a general
             exception and return make_response() with either 400 or 500
     """
-
-    if "dialog" in content:
-        # Create dict w/ content
-        # in format dialog | project=<id>
+    
+    if isinstance(content, int):
+        # Makes sure content is an int
+        # content is the projectID
         try:
-            arg = content.split("|")
-            if arg[1] != None:
-                args = make_dict(arg[1])
-
-            if "project" not in args or args["project"] == "":
-                return user_error(request)
-
             # opens dialog, pointless to have nested function
             slack_client.api_call(
                 "dialog.open",
                 trigger_id=request.form["trigger_id"],
-                dialog = create_fields(int(args["project"]))
+                dialog = create_fields(content)
             )
 
-        except AssertionError:
-            return api_error(request, "create")
+        except AssertionError as err:
+            print(err)
+            return commands_info.create(request,
+            headline="Oh no, there was an issue locating your project")
             
         except Exception as err:
             # Returns error message to user & 400 status
+            print(err)
             return user_error(request)
 
     else:
         try:
             content_dict = make_dict(content)
+            team_user_ids = {
+                "team": {
+                    "id": request.form["team_id"]
+                },
+                "user": {
+                    "id": request.form["user_id"]
+                }
+            }
+            content_dict.update(team_user_ids)
             item_create_response = create.from_text(base_url, content_dict)
             tools.return_to_slack(request, item_create_response)
         except Exception as err:
             print(err)
-            return user_error(request) # Server/parse error
+            return commands_info.create(request,
+            headline="Oh no, we had trouble handling your data!") # Server/parse error
         
     return make_response("", 200)

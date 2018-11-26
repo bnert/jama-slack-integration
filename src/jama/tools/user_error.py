@@ -16,7 +16,7 @@ def user_error(request):
                     "text": "Oh no, there was an error with your inputs!",
                     "attachments": [
                         {
-                            "text": "example: /jamaconnect create: project=49 | name=project name | ...\n\
+                            "text": "example: /jamaconnect create \n\
                             - or to open a dialog -  \n\
                             /jamaconnect create: dialog | project=<id>"
                         }

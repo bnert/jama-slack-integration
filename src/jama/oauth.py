@@ -71,6 +71,10 @@ def add_credentials(teamID, userID, clientID, client_secret):
         print("Database error:")
         print(e)
         return "Operation failed (internal server error)"
+
+    if get_access_token(teamID, userID) is None:
+        return "Invalid Client ID and/or Client Secret (Jama rejected authentication)"
+
     return "Added/Replaced ID and Secret"
 
 def get_access_token(teamID, userID):

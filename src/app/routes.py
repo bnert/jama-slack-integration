@@ -44,7 +44,6 @@ def jama_dialog():
     """
     if not rt_handle.verify_req(request):
         return make_response("", 401)
-    print("DIALOG")
     try:
         submit_payload = json.loads(request.form['payload'])
         return rt_handle.resolve_dialog_submit(base_url, submit_payload)
@@ -52,6 +51,7 @@ def jama_dialog():
     except Exception as err:
         print(err)
         return make_response("", 500)
+
 
 @app.route(url_rule + '/menu', methods=['GET', 'PUT', 'POST'])
 def jama_menu():
@@ -76,6 +76,31 @@ def jama_menu():
     except Exception as err:
         print(err)
         return make_response("", 500)
+
+@app.route(url_rule + '/bot', methods=['GET', 'PUT', 'POST'])
+def jama_bot():
+    """API intake to pass off slackbot data to Slack.
+
+    Passes json payload off to route_handler, otherwise an error is
+    thrown.
+
+    Args:
+        None
+
+    Returns:
+        Response Class object
+    """
+    if not rt_handle.verify_req(request):
+        return make_response("", 401)
+    print("BOT")
+    try:
+        submit_payload = request.get_json()
+        return rt_handle.resolve_bot_req(base_url, submit_payload)
+
+    except Exception as err:
+        print(err)
+        return make_response("", 500)
+
 
 @app.route(url_rule, methods=['GET', 'PUT', 'POST'])
 def jama():

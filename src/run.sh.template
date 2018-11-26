@@ -70,5 +70,10 @@ declare -rx SLACK_OAUTH_TOKEN=""
 # The server's SlackBot token. Necessary for the Slack Bot to work.
 declare -rx SLACK_BOT_TOKEN=""
 
+# The Events Request URL verify switch. 
+# If you are setting up the URL, please let SETUP_BOT="yes", to pass the verification
+# In future use of the slack Bot, please let SETUP_BOT="no".
+declare -rx SETUP_BOT=""
+
 
 flask run --port=${SERVER_PORT}

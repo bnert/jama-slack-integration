@@ -138,10 +138,7 @@ def resolve_jama_req(base_url, req):
     """
 
     # req.form = args from slash command
-    print(tools.cutArgument(req.form['text'], ':'))
     action, content = tools.cutArgument(req.form['text'], ':')
-    print(action)
-    print(content)
     action = action.strip().lower()
     content = content.strip()
 

@@ -3,6 +3,8 @@ import json
 import requests
 from flask import make_response
 from jama.json_factories import item_factory
+from jama import oauth
+from jama import api_caller
 from slack.slack_json_factories.resp_json import created_item
 from slack import tools
 from pprint import pprint
@@ -35,33 +37,45 @@ def from_dialog(url_base, json_to_parse):
     """
     try:
         sub_data = json_to_parse["submission"]
+        team_id = json_to_parse["team"]["id"]
+        user_id = json_to_parse["user"]["id"]
         jama_url = url_base + '/rest/latest/items?setGlobalIdManually=false'
 
-        to_post_obj = item_factory.generate_item()
-
-        parentId, projectId = tools.cutArgument(sub_data["projectId"], '.')
-
+        to_post_obj = item_factory.generate_item()        
+        parentId, projectId, item_type = sub_data["projectId"].split('.')
         to_post_obj["project"] = int(projectId)
         to_post_obj["location"]["parent"]["item"] = int(parentId)
-        to_post_obj["itemType"] = int(sub_data["itemType"])
+        to_post_obj["itemType"] = int(item_type)
         to_post_obj["fields"]["name"] = sub_data["newItemName"]
         to_post_obj["fields"]["description"] = sub_data["description"]
-        to_post_obj["fields"]["assignedTo"] = sub_data["asignee"]
 
-        jama_resp = requests.post(jama_url, json=to_post_obj, auth=(os.environ['JAMA_USER'], os.environ['JAMA_PASS']))
-            
-        return created_item.resp_json(json.loads(jama_resp.text), to_post_obj["project"])
+        jama_resp = api_caller.post(team_id, user_id, jama_url, payload=to_post_obj)
+        if jama_resp is None:
+            raise Exception("Invaid oauth credentials")
+
+        return created_item.resp_json(jama_resp, to_post_obj["project"])
     except Exception as err:
         print(err)
-        err_msg = {
-            "text": "We're sorry, we had trouble handling your data.",
-            "attachments": [
-                {
-                    "text": """Please give it another go!
-                    If it doens't work, please submit a bug report"""
+        if "oauth" in err:    
+            err_msg = {
+                "text": "{oauth_err}".format(oauth_err=err),
+                "attachments": [
+                    {
+                        "text": """Please update your oauth credentials and give it another go!
+                        If it doens't work, please submit a bug report"""
+                    }
+                ]
+            }
+        else:
+            err_msg = {
+                    "text": "We're sorry, we had trouble handling your data",
+                    "attachments": [
+                        {
+                            "text": """Please give it another go!
+                            If it doens't work, please submit a bug report"""
+                        }
+                    ]
                 }
-            ]
-        }
         return make_response(err_msg, 500)
 
 
@@ -102,6 +116,8 @@ If a field is an ID (e.g. projectID), it needs to be a number. Otherwise, it can
 
     # Gets JSON structure for a jama item
     to_post_obj = item_factory.generate_item()
+    team_id = content_dict["team"]["id"]
+    user_id = content_dict["user"]["id"]
 
     try:
         for key in content_dict:
@@ -140,11 +156,11 @@ If a field is an ID (e.g. projectID), it needs to be a number. Otherwise, it can
                 }
             ]
         }
-        
 
-    url = base_url + '/rest/latest/items/'
-    jama_resp = requests.post(
-        url, json=to_post_obj, auth=(os.environ['JAMA_USER'], os.environ['JAMA_PASS']))
+    jama_url = base_url + '/rest/latest/items/'
+    jama_resp = api_caller.post(team_id, user_id, jama_url, payload=to_post_obj)
+    if jama_resp is None:
+        raise Exception("Invaid oauth credentials")
 
     # Returns json object w/ url of new item
-    return created_item.resp_json(json.loads(jama_resp.text), to_post_obj["project"])
+    return created_item.resp_json(jama_resp, to_post_obj["project"])

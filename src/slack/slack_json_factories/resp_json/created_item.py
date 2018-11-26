@@ -52,11 +52,18 @@ def resp_json(payload_to_format, project_id):
         return {
             "text": "Oh no, there was an error creating the object",
             "attachments": [
-                    {
-                        "text": "Your error may be your inputs or item type\n\
-                        example input format: /jamaconnect create: project=49 | name=project name | ...\n\
-                        - or the new item may conflict with the intended item list - \n\
-                        Hint: You can always create a text item, then convert later"
-                    }
+                {
+                    "text": """Example usage of `/jamaconnect create`:
+\t`/jamaconnect create: <projectId>` brings up a dialog for
+\t\t\tthe top level items for the specified project, given the project's ID.
+\t---- or -----
+\t`/jamaconnect create: project=<projectID> | name=project name | ...` will
+\t\t\talso work, where `...` is other arguments, such as: `item=<itemID>`, or
+\t\t\t`description=your item description`.
+
+*Note: all fields with `<...>` around them are places you need to provide input. 
+If a field is an ID (e.g. projectID), it needs to be a number. Otherwise, it can be text.*
+                    """
+                }
             ]
         }

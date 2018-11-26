@@ -28,11 +28,11 @@ def attachment_fail_response(item_id, description, response=None):
     }
     # Base on the return data from Jama, give user some detail of the posting result.
     if response is None:
-        resp["attachments"][1]["title"] = "Error Massage"
+        resp["attachments"][1]["title"] = "Error Message"
         resp["attachments"][1]["text"] = "User's Oauth token is invalid or server is down. Please check again."
     else:
         resp["text"] = "Error"
-        resp["attachments"][1]["title"] = "Error Massage from Jama"
+        resp["attachments"][1]["title"] = "Error Message from Jama"
         resp["attachments"][1]["text"] = "Status: " + response["meta"]["status"] +\
                                          "\nMessage: " + response["meta"]["message"]
     return resp
@@ -78,7 +78,7 @@ def file_failure_response():
         "attachments": [
             {
                 "color": "danger",
-                "title": "Error Massage",
+                "title": "Error Message",
                 "text": "The message you choose has no file or the file cannot be uploaded. Please check again."
             }
         ]

@@ -11,9 +11,9 @@ def comment_response(item_id, comment, response=None):
         comment (string): the content user want to put into the comment
         response (dict): The response of jama API post /comment. This is not required if there is no response
                          from Jama. In this case, this function would assume the API calling process is stopped
-                         because of invalid user input and create an error massage.
+                         because of invalid user input and create an error message.
     Returns:
-        (dict): A JSon object of a slack massage, which shows the status of the Jama comment.
+        (dict): A JSon object of a slack message, which shows the status of the Jama comment.
     """
     # Base json for returning to slack
     resp = {
@@ -35,7 +35,7 @@ def comment_response(item_id, comment, response=None):
     # because of the input. This function should check the input and give proper response.
     if response is None:
         resp["text"] = "Bad Request"
-        resp["attachments"][1]["title"] = "Error Massage"
+        resp["attachments"][1]["title"] = "Error Message"
         if tools.string_to_int(item_id) < 0:
             resp["attachments"][1]["text"] += "The item id `" + item_id + "` is invalid.\n"
         if comment is "":
@@ -54,9 +54,9 @@ def comment_response(item_id, comment, response=None):
         resp["attachments"][1]["title"] = "Url to commented item"
         resp["attachments"][1]["text"] = "https://capstone-test.jamacloud.com/perspective.req#/items/" + item_id
     elif response["meta"]["status"] == "Not Found":
-        resp["attachments"][1]["title"] = "Error Massage"
+        resp["attachments"][1]["title"] = "Error Message"
         resp["attachments"][1]["text"] = "The item id `" + item_id + "` is not found. Please check again."
     else:
-        resp["attachments"][1]["title"] = "Error Massage"
-        resp["attachments"][1]["text"] = "Error massage from Jama: " + response["meta"]["message"]
+        resp["attachments"][1]["title"] = "Error Message"
+        resp["attachments"][1]["text"] = "Error message from Jama: " + response["meta"]["message"]
     return resp

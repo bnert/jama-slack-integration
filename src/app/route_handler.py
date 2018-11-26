@@ -193,13 +193,15 @@ def resolve_jama_req(base_url, req):
     else:
         # If input from user is buggy
         content = req.form["text"].strip()
-        if "comment" in content:
-            return commands_info.comment(request)
-        elif "create" in content:
+        if content.startswith("comment"):
+            return commands_info.comment(request,
+            headline="There was an error with your command! Here is a quick guide to using `/jamaconnect comment`:")
+        elif content.startswith("create"):
             return commands_info.create(request,
             headline="There was an error with your command! Here is a quick guide to using `/jamaconnect create`:")
-        elif "search" in content:
-            return commands_info.search(request)
+        elif content.startswith("search"):
+            return commands_info.search(request,
+            headline="There was an error with your command! Here is a quick guide to using `/jamaconnect search`:")
         else:
             return commands_info.all(request)
 

@@ -280,7 +280,7 @@ def dynamic_item_list(base_url, keyword, teamID, userID, state):
             index += 50
             if index >= total_results:
                 break
-            jama_json_response = jama_tools.search_item(base_url, project_id, index, keyword)
+            jama_json_response = jama_tools.search_item(base_url, project_id, index, keyword, teamID, userID)
             result_count = jama_json_response["meta"]["pageInfo"]["resultCount"]
         slack_payload = {
             "options": options_filtered[:100]

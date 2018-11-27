@@ -8,7 +8,7 @@ from slack.slack_json_factories.dialog_json import comment as dialog
 
 
 def resolve(base_url, content, slack_client, request):
-    """Resolves which create functionality (text/dialog) to invoke.
+    """Resolves which comment functionality (text/dialog) to invoke.
 
     Args:
         base_url (string): The base a Jama URL

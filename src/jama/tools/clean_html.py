@@ -1,16 +1,18 @@
+# from bs4 import BeautifulSoup
 import re
 
-def remove_tags(text):
+def remove_tags(html):
     """
-    Function will clean html by removing html tags leaving behind plaintext.
+    Function will clean html by removing html tags leaving behind plainhtml.
     Args:
-       text (string): The html to be cleaned 
+       html (string): The html to be cleaned 
     Returns:
-       (string): The plaintext 
+       (string): The plainhtml 
     """
-    text = re.sub("<[^<]+?>", "", text)
-    text = re.sub("&nbsp;", " ", text)
-    text = re.sub("&quot;", "\"", text)
-    text = re.sub("&apos;", "'", text)
-    text = re.sub("&gt;", "<", text)
-    return re.sub("&lt;", ">", text)
+    # return BeautifulSoup(html, "lxml").text
+    html = re.sub("<[^<]+?>", "", html)
+    html = re.sub("&nbsp;", " ", html)
+    html = re.sub("&quot;", "\"", html)
+    html = re.sub("&apos;", "'", html)
+    html = re.sub("&gt;", "<", html)
+    return re.sub("&lt;", ">", html)

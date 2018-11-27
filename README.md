@@ -91,6 +91,30 @@ are shown below:
 |Short Description: | Jama Connect commands||
 |Usage Hint|[help\|search\|create\|comment]||
 
+### Features > Event Subscriptions
+In this page, you need to turn on the Enable Events, fill in URLs, and 
+subscribe to bot events.
+1. Click to set the `On/Off` toggle button to `On`.
+2. In the `Enable Events` section, fill in the `Request URL` as 
+`your-hosting-url/URL_RULE/bot`.For example, if the url of your 
+hosting server is `https://www.jama.com` and the `URL_RULE` section in 
+`src/run.sh` is `"/jamaconnect"`, the `Request URL` should be 
+`https://www.jama.com/jamaconnect/bot`.
+Note: the URL should not have a trailing slash. When you set up this
+URL the first time, slack will need to verify the URL. You can change
+`SETUP_BOT` in `src/run.sh` to `on` to pass the verification. Once you
+have passed that, you can change it to `off` in later use. 
+3. In the `Subscribe to Bot Events` section, you need to add bot user event. 
+This will effect the range of message that the Bot user can listen from. 
+Recommendation:
+
+| Event Name | Note |
+-|-
+|message.channels | Bot can listen when a new message has posted to a public channel.|
+|message.groups | Bot can listen when a new message has posted to a private groups channel.|
+|message.im | Bot can listen when you set a direct message to the Bot.|
+
+
 ### Features > Bot User
 On this page, you need to turn on the Slack Bot User.
 1. Click the `Add A Bot User` button.

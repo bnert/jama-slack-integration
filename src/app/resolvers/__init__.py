@@ -9,6 +9,7 @@ from . import search_req
 from . import search_dialog
 from . import display_req
 from . import display_dialog
+from . import bot_button
 
 """Resolver module def
 

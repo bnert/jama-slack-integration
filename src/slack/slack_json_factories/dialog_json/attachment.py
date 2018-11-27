@@ -14,7 +14,7 @@ def attachment_dialog(payload):
     files = []
     if "files" in payload["message"]:
         for file in payload["message"]["files"]:
-            if file["mode"] == "hosted":
+            if file["mode"] != "tombstone" and "url_private_download" in file:
                 files.append({"name": file["name"], "url": file["url_private_download"]})
     if len(files) == 0:
         return None

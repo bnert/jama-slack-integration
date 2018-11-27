@@ -5,6 +5,10 @@ from . import create_dialog
 from . import comment_action
 from . import comment_req
 from . import comment_dialog
+from . import search_req
+from . import search_dialog
+from . import display_req
+from . import display_dialog
 
 """Resolver module def
 

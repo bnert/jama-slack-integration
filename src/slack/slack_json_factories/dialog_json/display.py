@@ -15,8 +15,7 @@ def display_dialog():
                 "type": "text",
                 "label": "Item ID",
                 "name": "id",
-                "min_length": 4,
-                "max_length": 4
+                "min_length": 4
             }
         ]
     }

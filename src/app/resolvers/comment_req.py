@@ -1,7 +1,6 @@
 from flask import make_response
 from jama import comment
 from slack import tools
-from jama.tools import make_dict
 from jama.tools import commands_info
 from jama.tools import api_error
 from slack.slack_json_factories.dialog_json import comment as dialog
@@ -42,15 +41,7 @@ def resolve(base_url, content, slack_client, request):
                 dialog=dialog.comment_dialog()
             )
         else:
-            args = make_dict(content)
-            if "id" not in args or "comment" not in args:
-                return commands_info.comment(request, "Oh no, there was an error with your inputs!")
-
-            comment_create_response = comment.from_inline(slack_team_id,
-                                                          slack_user_id,
-                                                          base_url,
-                                                          args
-                                                          )
+            comment_create_response = comment.from_inline(slack_team_id, slack_user_id, base_url, content)
             tools.return_to_slack(request, comment_create_response)
         return make_response("", 200)
 

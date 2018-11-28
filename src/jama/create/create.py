@@ -1,19 +1,15 @@
-import os
-import json
-import requests
 from flask import make_response
 from jama.json_factories import item_factory
-from jama import oauth
+from jama import tools as jama_tools
 from jama import api_caller
 from slack.slack_json_factories.resp_json import created_item
 from slack import tools
-from pprint import pprint
 
 """create.py == Backbone of create functionality
 
 There are two main functionalities present in this file:
-    1. Recieving formatted data from a dialog in Slack and posting to Jama
-    2. Recieving filtered/formatted data from text interface and posting to Jama
+    1. Receiving formatted data from a dialog in Slack and posting to Jama
+    2. Receiving filtered/formatted data from text interface and posting to Jama
 
 As the file name is states, these functions are the backbone for the ability to create
 an item from data that is input in Slack.
@@ -27,7 +23,7 @@ def from_dialog(url_base, json_to_parse):
     
     Args:
         url_base (string): base url for jama instance
-        json_to_parse (string): slack json submission
+        json_to_parse (dict): slack json submission
 
     Returns:
         (dict): Returns JSON object with created item url and status
@@ -47,11 +43,17 @@ def from_dialog(url_base, json_to_parse):
         to_post_obj["location"]["parent"]["item"] = int(parentId)
         to_post_obj["itemType"] = int(item_type)
         to_post_obj["fields"]["name"] = sub_data["newItemName"]
-        to_post_obj["fields"]["description"] = sub_data["description"]
+
+        # If the server do not use Jama OAuth, add a header to indicate who is the poster
+        if api_caller.is_using_oauth():
+            to_post_obj["fields"]["description"] = tools.prepare_html(sub_data["description"])
+        else:
+            header = jama_tools.prepare_writer_info(team_id, user_id, url_base, False)
+            to_post_obj["fields"]["description"] = tools.prepare_html(header + sub_data["description"])
 
         jama_resp = api_caller.post(team_id, user_id, jama_url, payload=to_post_obj)
         if jama_resp is None:
-            raise Exception("Invaid oauth credentials")
+            raise Exception("Invalid oauth credentials")
 
         return created_item.resp_json(jama_resp, to_post_obj["project"])
     except Exception as err:
@@ -62,7 +64,7 @@ def from_dialog(url_base, json_to_parse):
                 "attachments": [
                     {
                         "text": """Please update your oauth credentials and give it another go!
-                        If it doens't work, please submit a bug report"""
+                        If it doesn't work, please submit a bug report"""
                     }
                 ]
             }
@@ -72,7 +74,7 @@ def from_dialog(url_base, json_to_parse):
                     "attachments": [
                         {
                             "text": """Please give it another go!
-                            If it doens't work, please submit a bug report"""
+                            If it doesn't work, please submit a bug report"""
                         }
                     ]
                 }
@@ -120,6 +122,14 @@ If a field is an ID (e.g. projectID), it needs to be a number. Otherwise, it can
     user_id = content_dict["user"]["id"]
 
     try:
+        # If the server do not use Jama OAuth, add a header to indicate who is the poster
+        if "description" in content_dict:
+            if api_caller.is_using_oauth():
+                content_dict["description"] = tools.prepare_html(content_dict["description"])
+            else:
+                header = jama_tools.prepare_writer_info(team_id, user_id, base_url, False)
+                content_dict["description"] = tools.prepare_html(header + content_dict["description"])
+
         for key in content_dict:
             # Some keys need to be ints
             # specifically project, item, itemType
@@ -160,7 +170,7 @@ If a field is an ID (e.g. projectID), it needs to be a number. Otherwise, it can
     jama_url = base_url + '/rest/latest/items/'
     jama_resp = api_caller.post(team_id, user_id, jama_url, payload=to_post_obj)
     if jama_resp is None:
-        raise Exception("Invaid oauth credentials")
+        raise Exception("Invalid oauth credentials")
 
     # Returns json object w/ url of new item
     return created_item.resp_json(jama_resp, to_post_obj["project"])

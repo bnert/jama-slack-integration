@@ -21,11 +21,12 @@ def prepare_writer_info(slack_team_id, slack_user_id, jama_base_url, use_at_user
         found, jama_user_info = tools.get_user_by_email(jama_base_url,
                                                         slack_team_id,
                                                         slack_user_id,
-                                                        slack_user_info["email"])
+                                                        slack_user_info["email"]
+                                                        )
         if found:
             # prepare a html code for posting on Jama
             if use_at_user:
-                return "Jama user" + prepare_jama_mention(jama_user_info) + " post:\n"
+                return "Jama user " + prepare_jama_mention(jama_user_info) + " post:\n"
             else:
                 return "Jama user @" + jama_user_info["username"] + " post:\n"
         # prepare a html code for posting on Jama

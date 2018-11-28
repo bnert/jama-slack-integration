@@ -1,4 +1,5 @@
 import requests
+from flask import make_response
 from jama import display
 
 
@@ -14,7 +15,7 @@ def resolve_submit(base_url, payload):
         from the flask library.
     """
 
-    requests.get(payload["response_url"],
+    requests.post(payload["response_url"],
                   json=display.from_dialog(base_url, payload),
                   headers={"Content-Type": "application/json"})
     return make_response("", 200)

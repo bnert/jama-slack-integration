@@ -100,7 +100,7 @@ def from_dialog(base_url, payload):
     Returns:
         (dict): Returns JSON object with comment item url and status
     """
-    str_to_find = payload["submission"]["key"]
+    string_to_find = payload["submission"]["key"]
     team_id = payload["team"]["id"]
     user_id = payload["user"]["id"]
     return search_by_string(team_id, user_id, base_url, string_to_find)

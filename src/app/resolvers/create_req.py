@@ -35,11 +35,12 @@ def resolve(base_url, content, slack_client, request):
         # Makes sure content is an int
         # content is the projectID
         try:
-            # opens dialog, pointless to have nested function
+            team_user_ids = _scrape_team_user_id(request)
+            # opens dialog, passed projectId as content
             slack_client.api_call(
                 "dialog.open",
                 trigger_id=request.form["trigger_id"],
-                dialog = create_fields(content)
+                dialog = create_fields(content, team_user_ids)
             )
 
         except AssertionError as err:
@@ -55,14 +56,7 @@ def resolve(base_url, content, slack_client, request):
     else:
         try:
             content_dict = make_dict(content)
-            team_user_ids = {
-                "team": {
-                    "id": request.form["team_id"]
-                },
-                "user": {
-                    "id": request.form["user_id"]
-                }
-            }
+            team_user_ids = _scrape_team_user_id(request)
             content_dict.update(team_user_ids)
             item_create_response = create.from_text(base_url, content_dict)
             tools.return_to_slack(request, item_create_response)
@@ -72,3 +66,13 @@ def resolve(base_url, content, slack_client, request):
             headline="Oh no, we had trouble handling your data!") # Server/parse error
         
     return make_response("", 200)
+
+def _scrape_team_user_id(req):
+    return {
+            "team": {
+                "id": req.form["team_id"]
+            },
+            "user": {
+                "id": req.form["user_id"]
+            }
+        }

@@ -75,7 +75,6 @@ def search_by_string(team_id, user_id, base_url, string_to_find):
             return_data = {"text": str(num_of_result) + " search results for \"" + str(string_to_find) + "\" :"}
             return_data["text"] += "\nDisplaying the first " + str(MAX) + " results. View all results here: "\
                     + base_url + "/perspective.req#/search?term=" + urllib.parse.quote_plus(string_to_find)
-            "https://capstone-test.jamacloud.com/perspective.req#/search?term=test"
         # Set "attachments" value of response to the array of results and then return it
         return_data["attachments"] = data
 

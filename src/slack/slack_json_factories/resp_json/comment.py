@@ -1,4 +1,5 @@
 from slack import tools
+import os
 
 
 def comment_response(item_id, comment, response=None):
@@ -52,7 +53,7 @@ def comment_response(item_id, comment, response=None):
         resp["text"] = "Successfully created comment to item (id: " + item_id + ")"
         resp["attachments"][1]["color"] = "good"
         resp["attachments"][1]["title"] = "Url to commented item"
-        resp["attachments"][1]["text"] = "https://capstone-test.jamacloud.com/perspective.req#/items/" + item_id
+        resp["attachments"][1]["text"] = os.environ["JAMA_URL"] + "/perspective.req#/items/" + item_id
     elif response["meta"]["status"] == "Not Found":
         resp["attachments"][1]["title"] = "Error Message"
         resp["attachments"][1]["text"] = "The item id `" + item_id + "` is not found. Please check again."

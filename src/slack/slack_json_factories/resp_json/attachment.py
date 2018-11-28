@@ -1,3 +1,6 @@
+import os
+
+
 def attachment_fail_response(item_id, description, response=None):
     """
     Function takes in an item id, comment content, and a JSON object to create a message for Slack user.
@@ -59,7 +62,7 @@ def attachment_success_response(item_id, description):
             {
                 "color": "good",
                 "title": "Url to commented item",
-                "text": "https://capstone-test.jamacloud.com/perspective.req#/items/" + item_id
+                "text": os.environ["JAMA_URL"] + "/perspective.req#/items/" + item_id
             }
         ]
     } 

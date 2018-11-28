@@ -80,7 +80,6 @@ def comment_dialog(data=None):
                 "name": "comment",
                 "value": text
             }
-
         ],
         "state": state
     }

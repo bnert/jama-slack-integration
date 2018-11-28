@@ -3,6 +3,8 @@ from .user_error import user_error
 from .api_error import api_error
 from .jama_user import get_user_by_email
 from .writer_information import prepare_writer_info
+from .convert_date import convert
+from .clean_html import remove_tags
 from .jama_data import get_projectID
 from .jama_data import get_project_by_ID
 from .jama_data import get_item_by_ID

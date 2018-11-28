@@ -1,18 +1,17 @@
 from flask import make_response
-from jama import comment
+from jama import display
 from slack import tools
 from jama.tools import commands_info
 from jama.tools import api_error
-from slack.slack_json_factories.dialog_json import comment as dialog
-from jama.comment.comment import user_project_id_list
+from slack.slack_json_factories.dialog_json import display as dialog
 
 
 def resolve(base_url, content, slack_client, request):
-    """Resolves which comment functionality (text/dialog) to invoke.
+    """Resolves which display functionality (text/dialog) to invoke.
 
     Args:
-        base_url (string): The base a Jama URL
-        content (JSON Object): Payload from dialog submission
+        base_url (string): The base Jama URL
+        content (string): The item id, empty in case of dialog
         slack_client (SlackClient Object): to invoke slack dialog
         request (Request Object): Request object to pass down
 
@@ -28,21 +27,20 @@ def resolve(base_url, content, slack_client, request):
             On any error with parsing user data, we throw a general
             exception and return make_response() with either 400 or 500
     """
-    global user_project_id_list
     try:
-        slack_team_id = request.form["team_id"]
-        slack_user_id = request.form["user_id"]
         if content == "":
-            if (slack_team_id, slack_user_id) in user_project_id_list:
-                del user_project_id_list[(slack_team_id, slack_user_id)]
             slack_client.api_call(
                 "dialog.open",
                 trigger_id=request.form["trigger_id"],
-                dialog=dialog.comment_dialog()
+                dialog=dialog.display_dialog()
             )
         else:
-            comment_create_response = comment.from_inline(slack_team_id, slack_user_id, base_url, content)
-            tools.return_to_slack(request, comment_create_response)
+            display_result = display.fetch_by_id(request.form["team_id"],
+                                                          request.form["user_id"],
+                                                          base_url,
+                                                          content
+                                                          )
+            tools.return_to_slack(request, display_result)
         return make_response("", 200)
 
     except AssertionError:

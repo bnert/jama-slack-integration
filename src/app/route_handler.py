@@ -86,6 +86,11 @@ def resolve_dialog_submit(base_url, payload):
             return comment_dialog.resolve_submit(base_url, payload)
         elif payload["callback_id"] == "attachment":
             return attachment_dialog.resolve_submit(base_url, payload)
+        elif payload["callback_id"] == "search":
+            return search_dialog.resolve_submit(base_url, payload)
+        elif payload["callback_id"] == "display":
+            print("reached display thru dialog")
+            return display_dialog.resolve_submit(base_url, payload)
         elif payload["callback_id"] == "oauth":
             requests.post(payload["response_url"],
                           json={ "text": oauth.receive_dialog(payload) },
@@ -148,17 +153,25 @@ def resolve_jama_req(base_url, req):
 
     # req.form = args from slash command
     action, content = tools.cutArgument(req.form['text'], ':')
+    print("Action: " + action)
+    print("Content: " + content)
     action = action.strip().lower()
     content = content.strip()
 
     # See's what kind of arguments there are
     if(action == 'search'):
         print('SEARCH')
-        return resolve_search_req(base_url, content)
+        return search_req.resolve(base_url=base_url,
+                                content=content,
+                                slack_client=slack_client,
+                                request=request)
 
     elif(action == 'display'):
         print('DISPLAY')
-        return resolve_display_req(base_url, content)
+        return display_req.resolve(base_url=base_url,
+                                content=content,
+                                slack_client=slack_client,
+                                request=request)
 
     elif 'create' in action:
         if (content == ""):
@@ -207,48 +220,6 @@ def resolve_jama_req(base_url, req):
 
 
 ### Resolver functions
-
-def resolve_search_req(base_url, content):
-    """
-    @params:
-        base_url -> url to pass down
-        content -> contains search key (i.e. "key=some search string")
-    """
-
-    try:
-        # Make dictionary of the key value pairs encoded in content
-        content = make_dict(content)
-        # Assigns JSON obj to search result
-        search_result = search.search_by_string(base_url, content["key"])
-        tools.return_to_slack(request, search_result)
-        return make_response("", 200)
-
-    except Exception as e:
-        print(e)
-        return commands_info.search(request,
-            headline="There was an error with your command! Here is a quick guide to using `/jamaconnect search`:")
-
-
-def resolve_display_req(base_url, content):
-    """
-    @params:
-        base_url -> url to pass down
-        content -> contains search key (i.e. "id=jama item ID")
-    """
-
-    try:
-        # Make dictionary of the key value pairs encoded in content
-        content = make_dict(content)
-        # Assigns JSON obj to search result
-        search_result = search.search_by_id(base_url, content["id"])
-        tools.return_to_slack(request, search_result)
-        return make_response("", 200)
-
-    except Exception as e:
-        print(e)
-        return commands_info.search(request,
-            headline="There was an error with your command! Here is a quick guide to using `/jamaconnect display`:")
-
 
 def resolve_oauth_req(req, content):
     """

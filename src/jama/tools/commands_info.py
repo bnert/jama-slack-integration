@@ -34,9 +34,15 @@ def all(req):
     \t\t\t`description=your item description`.
 
 3. Search:
-    \t`/jamaconnect search: key=<your search phrase>` will return relevant items
+    \t`/jamaconnect search` brings up a dialog to search for items
     \t---- or -----
-    \t`/jamaconnect display: id=<itemID>` will return details of the specified item,
+    \t`/jamaconnect search: <your search phrase>` will show items
+    \t\t\twhich contain the given search phrase.
+    
+4. Display:
+    \t`/jamaconnect display` brings up a dialog to display an item by ID
+    \t---- or -----
+    \t`/jamaconnect display: <itemID>` will return details of the specified item,
     \t\t\tgiven the item ID.
 
 *Note: all fields with `<...>` around them are places you need to provide input. 
@@ -122,9 +128,38 @@ def search(req, headline="Hey! Here is a quick guide to using `/jamaconnect sear
                         {
                             "text": """
 Search usage:
-    \t`/jamaconnect search: key=<your search phrase>` will return relevant items
+    \t`/jamaconnect search` brings up a dialog to search for items
     \t---- or -----
-    \t`/jamaconnect display: id=<itemID>` will return details of the specified item,
+    \t`/jamaconnect search: <your search phrase>` will show items
+    \t\t\twhich contain the given search phrase.
+
+*Note: all fields with `<...>` around them are places you need to provide input. 
+If a field is an ID (e.g. projectID), it needs to be a number. Otherwise, it can be text.*
+                            """
+                        }
+                    ]
+                })
+    return make_response("", 200)
+
+def display(req, headline="Hey! Here is a quick guide to using `/jamaconnect display`:"):
+    """display: show info for display slash command
+
+
+    Arguments:
+        req (Request object): Passed down to return to slack
+
+    Returns:
+        Response (object): Returned up to called funciton in route_handler
+    """
+    return_to_slack(req, {
+                    "text": headline,
+                    "attachments": [
+                        {
+                            "text": """
+Display usage:
+    \t`/jamaconnect display` brings up a dialog to display an item by ID
+    \t---- or -----
+    \t`/jamaconnect display: <itemID>` will return details of the specified item,
     \t\t\tgiven the item ID.
 
 *Note: all fields with `<...>` around them are places you need to provide input. 

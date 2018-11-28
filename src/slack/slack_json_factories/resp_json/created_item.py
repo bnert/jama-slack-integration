@@ -1,4 +1,5 @@
 import json
+import os
 
 """Returns url to access created item
 
@@ -29,8 +30,10 @@ def resp_json(payload_to_format, project_id):
             and error message is sent to the user
     """
     try:
-        url_to_new_item = "https://capstone-test.jamacloud.com/perspective.req#/items/{item_id}?projectId={prj_id}".format(
-            item_id=str(payload_to_format["meta"]["id"]), prj_id=project_id
+        url_to_new_item = "{base_url}/perspective.req#/items/{item_id}?projectId={prj_id}".format(
+            base_url=os.environ["JAMA_URL"],
+            item_id=str(payload_to_format["meta"]["id"]),
+            prj_id=project_id
         )
 
         return {

@@ -1,5 +1,5 @@
-# from bs4 import BeautifulSoup
-import re
+from bs4 import BeautifulSoup
+# import re
 
 def remove_tags(html):
     """
@@ -9,10 +9,12 @@ def remove_tags(html):
     Returns:
        (string): The plainhtml 
     """
-    # return BeautifulSoup(html, "lxml").text
+    return BeautifulSoup(html, "lxml").text
+    """
     html = re.sub("<[^<]+?>", "", html)
     html = re.sub("&nbsp;", " ", html)
     html = re.sub("&quot;", "\"", html)
     html = re.sub("&apos;", "'", html)
     html = re.sub("&gt;", "<", html)
     return re.sub("&lt;", ">", html)
+    """

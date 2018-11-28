@@ -9,7 +9,6 @@ import hmac
 import hashlib
 import urllib
 
-
 """This file contains the central search functionality
 
 There are two main functionaries present in this file:
@@ -19,9 +18,6 @@ There are two main functionaries present in this file:
 Attributes:
     None
 """
-
-username = os.environ["JAMA_USER"]
-password = os.environ["JAMA_PASS"]
 
 def search_by_string(team_id, user_id, base_url, string_to_find):
     """
@@ -46,8 +42,7 @@ def search_by_string(team_id, user_id, base_url, string_to_find):
     # Append search string to base search url and then make request
     url = base_url + "/rest/latest/" + "abstractitems?contains=" + string_to_find
     print("URL:" + url)
-    json_response = get(url)
-    # json_response = api_caller.get(team_id, user_id, url)
+    json_response = api_caller.get(team_id, user_id, url)
     if json_response is None:
         return {"text": "Failed to authenticate command with OAuth. Try running `/jamaconnect oauth`"}
 
@@ -104,7 +99,3 @@ def from_dialog(base_url, payload):
     team_id = payload["team"]["id"]
     user_id = payload["user"]["id"]
     return search_by_string(team_id, user_id, base_url, string_to_find)
-
-def get(url):
-    response = requests.get(url, auth=(username, password))
-    return json.loads(response.text)

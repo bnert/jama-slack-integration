@@ -9,9 +9,15 @@ import hmac
 import hashlib
 import urllib
 
+"""This file contains the central search functionality
 
-username = os.environ["JAMA_USER"]
-password = os.environ["JAMA_PASS"]
+There are two main functionaries present in this file:
+    1. Receiving formatted data from a dialog in Slack and posting to Jama
+    2. Receiving filtered/formatted data from inline interface and posting to Jama
+
+Attributes:
+    None
+"""
 
 def fetch_by_id(team_id, user_id, base_url, id_to_find):
     """
@@ -29,8 +35,7 @@ def fetch_by_id(team_id, user_id, base_url, id_to_find):
         return {"text": "Please include an item ID, e.g. `/jamaconnect display: <unique jama item ID>`."}
     # Append search string to base search url and then make request
     url = base_url + "/rest/latest/" + "abstractitems/" + id_to_find
-    json_response = get(url)
-    # json_response = api_caller.get(team_id, user_id, url)
+    json_response = api_caller.get(team_id, user_id, url)
     if json_response is None:
         return {"text": "Failed to authenticate command with OAuth. Try running `/jamaconnect oauth`"}
 
@@ -59,10 +64,6 @@ def fetch_by_id(team_id, user_id, base_url, id_to_find):
         return return_data
     else:
         return {"text": "No item found with ID: " + id_to_find}
-
-def get(url):
-    response = requests.get(url, auth=(username, password))
-    return json.loads(response.text)
 
 def from_dialog(base_url, payload):
     """

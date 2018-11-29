@@ -14,7 +14,7 @@ Attributes:
     None
 """
 
-def create_fields(project_id, team_user_ids):
+def create_fields(project_id, team_id, user_id):
     """Returns dialog box
     
     Args: 
@@ -34,12 +34,12 @@ def create_fields(project_id, team_user_ids):
         "title": "JamaConnect - Create",
         "submit_label": "Submit",
         "callback_id": "jamaconnect_create_dialog",
-        "elements": _fields_array(project_id, team_user_ids)
+        "elements": _fields_array(project_id, team_id, user_id)
         
     }
 
 # Private helper functions to interface w/ Jama API
-def _fields_array(project_id, team_user_ids):
+def _fields_array(project_id, team_id, user_id):
     """Creates an array from API data.
 
     FUNCTION IS PRIVATE
@@ -50,7 +50,7 @@ def _fields_array(project_id, team_user_ids):
     Raises:
         None
     """
-    prj_data = _get_jama_project_items(project_id, team_user_ids)
+    prj_data = _get_jama_project_items(project_id, team_id, user_id)
     return [
         {
             "label": "Project Item",
@@ -74,7 +74,7 @@ def _fields_array(project_id, team_user_ids):
     ]
 
 
-def _get_jama_project(project_id, team_user_ids):
+def _get_jama_project(project_id, team_id, user_id):
     """GETs project
 
     Args:
@@ -82,8 +82,8 @@ def _get_jama_project(project_id, team_user_ids):
     """
     url = (os.environ['JAMA_URL'] + "/rest/latest/projects/{id}").format(id=project_id)
     resp = api_caller.get(
-        team_user_ids["team"]["id"], 
-        team_user_ids["user"]["id"],
+        team_id, 
+        user_id,
         url)
 
     # handled in create_req 
@@ -91,7 +91,7 @@ def _get_jama_project(project_id, team_user_ids):
     return resp
 
 
-def _get_jama_project_items(project_id, team_user_ids):
+def _get_jama_project_items(project_id, team_id, user_id):
     """GETs root items of a project
 
     Args:
@@ -100,13 +100,13 @@ def _get_jama_project_items(project_id, team_user_ids):
     # Gets all items
     url = os.environ['JAMA_URL']
 
-    project = _get_jama_project(project_id, team_user_ids)
+    project = _get_jama_project(project_id, team_id, user_id)
     get_url = "{url}/rest/latest/items?project={id}&rootOnly=true".format(
             url=url, id=project_id
         )
     items_resp = api_caller.get(
-        team_user_ids["team"]["id"], 
-        team_user_ids["user"]["id"], 
+        team_id,
+        user_id,
         get_url)
 
     assert("OK" == items_resp["meta"]["status"])

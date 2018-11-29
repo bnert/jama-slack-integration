@@ -30,17 +30,17 @@ def resolve(base_url, content, slack_client, request):
             On any error with parsing user data, we throw a general
             exception and return make_response() with either 400 or 500
     """
-    
+    team_id = request.form["team_id"]
+    user_id = request.form["user_id"]
     if isinstance(content, int):
         # Makes sure content is an int
         # content is the projectID
         try:
-            team_user_ids = _scrape_team_user_id(request)
             # opens dialog, passed projectId as content
             slack_client.api_call(
                 "dialog.open",
                 trigger_id=request.form["trigger_id"],
-                dialog = create_fields(content, team_user_ids)
+                dialog = create_fields(content, team_id, user_id)
             )
 
         except AssertionError as err:
@@ -56,9 +56,7 @@ def resolve(base_url, content, slack_client, request):
     else:
         try:
             content_dict = make_dict(content)
-            team_user_ids = _scrape_team_user_id(request)
-            content_dict.update(team_user_ids)
-            item_create_response = create.from_text(base_url, content_dict)
+            item_create_response = create.from_text(base_url, content_dict, team_id, user_id)
             tools.return_to_slack(request, item_create_response)
         except Exception as err:
             print(err)
@@ -66,13 +64,3 @@ def resolve(base_url, content, slack_client, request):
             headline="Oh no, we had trouble handling your data!") # Server/parse error
         
     return make_response("", 200)
-
-def _scrape_team_user_id(req):
-    return {
-            "team": {
-                "id": req.form["team_id"]
-            },
-            "user": {
-                "id": req.form["user_id"]
-            }
-        }

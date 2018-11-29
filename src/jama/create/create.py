@@ -80,7 +80,7 @@ def from_dialog(url_base, json_to_parse):
 
 
 
-def from_text(base_url, content_dict):
+def from_text(base_url, content_dict, team_id, user_id):
     """Create a item to be passed to Jama API
     
     Args:
@@ -116,8 +116,6 @@ If a field is an ID (e.g. projectID), it needs to be a number. Otherwise, it can
 
     # Gets JSON structure for a jama item
     to_post_obj = item_factory.generate_item()
-    team_id = content_dict["team"]["id"]
-    user_id = content_dict["user"]["id"]
 
     try:
         for key in content_dict:

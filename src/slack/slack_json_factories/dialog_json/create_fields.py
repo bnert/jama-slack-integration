@@ -1,6 +1,7 @@
 import os
 import json
 import requests
+from jama import api_caller
 from flask import make_response
 
 """Return dialog fields for Slack from Jama API
@@ -13,7 +14,7 @@ Attributes:
     None
 """
 
-def create_fields(project_id):
+def create_fields(project_id, team_id, user_id):
     """Returns dialog box
     
     Args: 
@@ -33,12 +34,12 @@ def create_fields(project_id):
         "title": "JamaConnect - Create",
         "submit_label": "Submit",
         "callback_id": "jamaconnect_create_dialog",
-        "elements": _fields_array(project_id)
+        "elements": _fields_array(project_id, team_id, user_id)
         
     }
 
 # Private helper functions to interface w/ Jama API
-def _fields_array(project_id):
+def _fields_array(project_id, team_id, user_id):
     """Creates an array from API data.
 
     FUNCTION IS PRIVATE
@@ -49,10 +50,7 @@ def _fields_array(project_id):
     Raises:
         None
     """
-
-    #item_types, types_obj = _get_jama_item_types() #used to map item id's in getting projects
-    prj_data = _get_jama_project_items(project_id)
-    
+    prj_data = _get_jama_project_items(project_id, team_id, user_id)
     return [
         {
             "label": "Project Item",
@@ -63,12 +61,6 @@ def _fields_array(project_id):
             ]
                   
         },
-        # {
-        #     "label": "Item Type",
-        #     "type": "select",
-        #     "name": "itemType",
-        #     "options": item_types
-        # },
         {
             "label": "New Item Name",
             "type": "text",
@@ -79,27 +71,27 @@ def _fields_array(project_id):
             "type": "textarea",
             "name": "description"
         }
-
     ]
 
 
-def _get_jama_project(project_id):
+def _get_jama_project(project_id, team_id, user_id):
     """GETs project
 
     Args:
         project_id: id of the project the user wants to access
     """
     url = (os.environ['JAMA_URL'] + "/rest/latest/projects/{id}").format(id=project_id)
-    resp = requests.get(url, auth=(os.environ["JAMA_USER"], os.environ["JAMA_PASS"]))
+    resp = api_caller.get(
+        team_id, 
+        user_id,
+        url)
 
     # handled in create_req 
-    assert(200 == resp.status_code)
-    resp_json = json.loads(resp.text)
-
-    return resp_json
+    assert("OK" == resp["meta"]["status"])
+    return resp
 
 
-def _get_jama_project_items(project_id):
+def _get_jama_project_items(project_id, team_id, user_id):
     """GETs root items of a project
 
     Args:
@@ -108,15 +100,17 @@ def _get_jama_project_items(project_id):
     # Gets all items
     url = os.environ['JAMA_URL']
 
-    project = _get_jama_project(project_id)
+    project = _get_jama_project(project_id, team_id, user_id)
     get_url = "{url}/rest/latest/items?project={id}&rootOnly=true".format(
-            url=url, id=project["data"]["id"]
+            url=url, id=project_id
         )
+    items_resp = api_caller.get(
+        team_id,
+        user_id,
+        get_url)
 
-    items_resp = requests.get(get_url, auth=(os.environ["JAMA_USER"], os.environ["JAMA_PASS"]))
-    
-    assert(200 == items_resp.status_code)
-    project_items = json.loads(items_resp.text)
+    assert("OK" == items_resp["meta"]["status"])
+    project_items = items_resp
 
     # Checks to see if childItemType is valid, if so, adds to the options
     prj_items = []
@@ -150,30 +144,3 @@ def _get_jama_project_items(project_id):
     "options": prj_items
     }
 
-def _get_jama_item_types():
-    """GETs item types defined in a Jama instance
-
-    Args:
-        None
-
-    Returns: 
-        Array: objects of users data in the Jama instance
-    """
-    url = os.environ['JAMA_URL'] + "/rest/latest/itemtypes?maxResults=50"
-    resp = requests.get(url, auth=(os.environ["JAMA_USER"], os.environ["JAMA_PASS"]))
-    
-    assert(200 == resp.status_code)
-    resp_json = json.loads(resp.text)
-    
-    item_types = {}
-    for item in resp_json["data"]:
-        item_name = str(item["id"])
-        item_types[item_name] = item["display"]
-
-    # Returns an array of objects
-    return [{
-            "label": item["display"], 
-            "value": item["id"] 
-        } 
-        for item in resp_json["data"] 
-    ], item_types # Returns a tuple

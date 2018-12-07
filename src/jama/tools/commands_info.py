@@ -71,7 +71,7 @@ def comment(req, headline="Hey! Here is a quick guide to using `/jamaconnect com
 Comment usage:
     \t`/jamaconnect comment` brings up a dialog to comment on an item.
     \t---- or -----
-    \t`/jamaconnect comment: id=<item ID>| comment=<comment context>` will also work.
+    \t`/jamaconnect comment: <item ID>| <comment context>` will also work.
 
 *Note: all fields with `<...>` around them are places you need to provide input. 
 If a field is an ID (e.g. projectID), it needs to be a number. Otherwise, it can be text.*
